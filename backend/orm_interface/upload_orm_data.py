@@ -6,6 +6,14 @@ from orm_interface.entities.studyprogram import StudyProgram
 from orm_interface.entities.professor import Professor
 from orm_interface.entities.timetable import Timetable
 from orm_interface.base import Base, Session, engine
+
+from orm_interface.entities.smatch.courselist import CourseList
+from orm_interface.entities.smatch.matched_terms import MatchedTerm
+from orm_interface.entities.smatch.replies import Replie
+from orm_interface.entities.smatch.replies_old import ReplieOld
+from orm_interface.entities.smatch.threads import Thread
+from orm_interface.entities.smatch.threads_old import ThreadOld
+
 import datetime
 import os
 

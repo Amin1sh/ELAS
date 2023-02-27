@@ -52,6 +52,14 @@ export const projectDetails = [
       "The idea of the project was to develop an educational website for students to search for a suitable project for bachelor’s, master's, and personal projects as well as theses. This project allows students to also find for potential group members to work in a group",
   },
   {
+    name: "Smatch",
+    image: "images/smatch.jpg",
+    shortName: "smatch",
+    teamMembers: "Amin Shahin",
+    description:
+      "The idea of the project is smatch",
+  },
+  {
     name: "Student Connector (Studect)",
     image: "images/studect.jpg",
     shortName: "student-connector",

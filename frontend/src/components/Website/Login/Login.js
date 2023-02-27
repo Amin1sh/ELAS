@@ -224,13 +224,13 @@ export default function Login() {
                 <ArrowForwardIcon />
               </Grid>
             </Button>
-            {/* <Grid container justifyContent="center">
+            <Grid container justifyContent="center">
               <Grid item>
                 <Link href="#" variant="body2" onClick={() => history.push("/register")}>
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>
-            </Grid> */}
+            </Grid>
             <Box mt={5}>
               <Copyright />
             </Box>

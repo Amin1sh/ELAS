@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ProjectCard(props) {
   const {name, image, shortName, description, teamMembers} = props;
+  const isLoggedIn = !!sessionStorage.getItem("elas_userLoggedIn");
   const styles = useStyles();
   const history = useHistory();
   const [expanded, setExpanded] = React.useState(false);
@@ -53,8 +54,8 @@ export default function ProjectCard(props) {
   return (
     <Card className={styles.root} raised={hover} onMouseEnter={()=>setHover(!hover)} onMouseLeave={()=>setHover(!hover)}>
       <Tooltip arrow placement="bottom" title={<Typography>View project</Typography>}>
-        {/*<CardActionArea onClick={isLoggedIn ? () => history.push('/' + shortName) : () => history.push('/login')}>*/}
-        <CardActionArea onClick={() => history.push('/' + shortName)}>
+        <CardActionArea onClick={isLoggedIn ? () => history.push('/' + shortName) : () => history.push('/login')}>
+        {/* <CardActionArea onClick={() => history.push('/' + shortName)}> */}
           <CardMedia
             className={styles.media}
             image={image}

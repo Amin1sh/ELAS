@@ -11,6 +11,7 @@ from .resources.project_finder.project_finder import project_finder
 from .resources.intogen.intogen import intogen
 from .resources.student_connector.student_connector import student_connector
 from .resources.study_soon.study_soon import study_soon
+from .resources.smatch.smatch import smatch
 
 
 def create_app(config_object="application.settings"):
@@ -28,6 +29,7 @@ def create_app(config_object="application.settings"):
     app.register_blueprint(intogen, url_prefix="/intogen")
     app.register_blueprint(student_connector, url_prefix="/studentconnector")
     app.register_blueprint(study_soon, url_prefix="/studysoon")
+    app.register_blueprint(smatch, url_prefix="/smatch")
 
     try:
         _create_unverified_https_context = ssl._create_unverified_context

@@ -17,6 +17,7 @@ import StudyCompassHomepage from "./Projects/UDEStudyCompass/StudyCompassHomepag
 import Backend from "../assets/functions/Backend";
 import ProjectFinder from "./Projects/ProjectFinder/ProjectFinder";
 import StudentConnector from "./Projects/StudentConnector/StudentConnector";
+import Smatch from "./Projects/Smatch/Smatch";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -82,6 +83,11 @@ export default function App() {
             exact
             path="/student-connector"
             render={() => <StudentConnector/>}
+          />
+          <Route
+            exact
+            path="/smatch"
+            render={() => <Smatch />}
           />
 
           {!isLoggedIn ? (
