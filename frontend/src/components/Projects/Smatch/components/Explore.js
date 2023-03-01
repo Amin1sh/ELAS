@@ -15,7 +15,7 @@ export default function Explore() {
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 px-2 py-6">
             {topics ?
               topics.map((topic) => (
-                <Link key={topic || "Other"} to={`/smatch/match/${encodeURIComponent(topic)}`} className="px-4 py-2 flex items-center justify-center text-center bg-gray-900 text-white rounded-full cursor-pointer">
+                <Link key={topic || "Other"} to={`/smatch/match/${encodeURIComponent(topic)}`} className="px-4 py-2 link-without-underline flex items-center justify-center text-center bg-gray-900 text-white rounded-full cursor-pointer">
                   { topic || "Other" }
                 </Link>
               ))

@@ -35,12 +35,14 @@ const Smatch = () => {
   })
 
   return (
-    <div className="bg-slate-800 flex flex-col items-center justify-between min-h-screen">
+    // Remove bg-slate-800 to have the Elas background
+    <div className="flex flex-col items-center justify-between min-h-screen">
       <div className="w-full max-w-4xl min-h-screen flex flex-col pb-24">
         
-        <div className="flex flex-row item-center justify-center">
+        {/* Hide the Smatch logo */}
+        {/* <div className="flex flex-row item-center justify-center">
           <SMATCHLogo />
-        </div>
+        </div> */}
 
         <div className="flex flex-row item-center justify-center">
           <Explore></Explore>
