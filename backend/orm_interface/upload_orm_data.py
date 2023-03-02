@@ -9,8 +9,8 @@ from orm_interface.base import Base, Session, engine
 
 from orm_interface.entities.smatch.courselist import CourseList
 from orm_interface.entities.smatch.matched_terms import MatchedTerm
-from orm_interface.entities.smatch.replies import Replie
-from orm_interface.entities.smatch.replies_old import ReplieOld
+from orm_interface.entities.smatch.replies import Reply
+from orm_interface.entities.smatch.replies_old import ReplyOld
 from orm_interface.entities.smatch.threads import Thread
 from orm_interface.entities.smatch.threads_old import ThreadOld
 

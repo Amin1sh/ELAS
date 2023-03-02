@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime, TIMESTAMP, text, ForeignKey
 from orm_interface.base import Base
 
-class Replie(Base):
+class Reply(Base):
     __tablename__ = "replies"
 
     id = Column(Integer, primary_key=True)
