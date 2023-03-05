@@ -11,7 +11,7 @@ class ReplyOld(Base):
     created_on = Column(String)
     username = Column(String)
 
-    def __init__(self, id, reply_id, thread_id, body, created_on, username):
+    def __init__(self, reply_id, thread_id, body, created_on, username, id=None):
         self.id = id
         self.reply_id = reply_id
         self.thread_id = thread_id

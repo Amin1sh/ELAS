@@ -8,7 +8,7 @@ class MatchedTerm(Base):
     term = Column(String)
     count = Column(Integer)
 
-    def __init__(self, id, term, count):
+    def __init__(self, term, count, id=None):
         self.id = id
         self.term = term
         self.count = count

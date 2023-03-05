@@ -11,7 +11,7 @@ class ThreadOld(Base):
     created_on = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     username = Column(String)
 
-    def __init__(self, id, thread_id, title, body, created_on, username):
+    def __init__(self, thread_id, title, body, created_on, username, id=None):
         self.id = id
         self.thread_id = thread_id
         self.title = title

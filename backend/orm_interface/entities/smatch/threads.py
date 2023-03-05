@@ -11,7 +11,7 @@ class Thread(Base):
     created_on = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
     category = Column(String)
 
-    def __init__(self, id, user_id, title, body, created_on, category):
+    def __init__(self, user_id, title, body, created_on, category, id=None):
         self.id = id
         self.user_id = user_id
         self.title = title

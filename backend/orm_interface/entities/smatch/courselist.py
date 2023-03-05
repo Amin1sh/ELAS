@@ -15,7 +15,7 @@ class CourseList(Base):
     link = Column(String)
     category = Column(String)
 
-    def __init__(self, id, name, provider, level, instructor, description, duration, price, link, category):
+    def __init__(self, name, provider, level, instructor, description, duration, price, link, category, id=None):
         self.id = id
         self.name = name
         self.provider = provider

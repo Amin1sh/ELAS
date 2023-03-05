@@ -10,7 +10,7 @@ class Reply(Base):
     body = Column(String)
     created_on = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
 
-    def __init__(self, id, user_id, thread_id, body, created_on):
+    def __init__(self, user_id, thread_id, body, created_on, id=None):
         self.id = id
         self.user_id = user_id
         self.thread_id = thread_id
