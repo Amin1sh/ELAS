@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Integer, Float
 from orm_interface.base import Base
 
-class MatchedTerm(Base):
-    __tablename__ = "matched_terms"
+class Smatch_MatchedTerm(Base):
+    __tablename__ = "smatch_matched_terms"
 
     id = Column(Integer, primary_key=True)
     term = Column(String)

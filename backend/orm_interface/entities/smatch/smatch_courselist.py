@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Integer, Float
 from orm_interface.base import Base
 
-class CourseList(Base):
-    __tablename__ = "courselist"
+class Smatch_CourseList(Base):
+    __tablename__ = "smatch_courselist"
 
     id = Column(Integer, primary_key=True)
     name = Column(String)

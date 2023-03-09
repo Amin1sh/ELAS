@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime, TIMESTAMP, text
 from orm_interface.base import Base
 
-class ReplyOld(Base):
-    __tablename__ = "replies_old"
+class Smatch_ReplyOld(Base):
+    __tablename__ = "smatch_replies_old"
 
     id = Column(Integer, primary_key=True)
     reply_id = Column(Integer)

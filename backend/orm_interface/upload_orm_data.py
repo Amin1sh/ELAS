@@ -7,12 +7,12 @@ from orm_interface.entities.professor import Professor
 from orm_interface.entities.timetable import Timetable
 from orm_interface.base import Base, Session, engine
 
-from orm_interface.entities.smatch.courselist import CourseList
-from orm_interface.entities.smatch.matched_terms import MatchedTerm
-from orm_interface.entities.smatch.replies import Reply
-from orm_interface.entities.smatch.replies_old import ReplyOld
-from orm_interface.entities.smatch.threads import Thread
-from orm_interface.entities.smatch.threads_old import ThreadOld
+from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
+from orm_interface.entities.smatch.smatch_matched_terms import Smatch_MatchedTerm
+from orm_interface.entities.smatch.smatch_replies import Smatch_Reply
+from orm_interface.entities.smatch.smatch_replies_old import Smatch_ReplyOld
+from orm_interface.entities.smatch.smatch_threads import Smatch_Thread
+from orm_interface.entities.smatch.smatch_threads_old import Smatch_ThreadOld
 
 import datetime
 import os

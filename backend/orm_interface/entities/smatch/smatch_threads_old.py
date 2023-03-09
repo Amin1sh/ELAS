@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime, TIMESTAMP, text
 from orm_interface.base import Base
 
-class ThreadOld(Base):
-    __tablename__ = "threads_old"
+class Smatch_ThreadOld(Base):
+    __tablename__ = "smatch_threads_old"
 
     id = Column(Integer, primary_key=True)
     thread_id = Column(Integer)
