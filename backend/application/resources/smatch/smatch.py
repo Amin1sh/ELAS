@@ -1,6 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from orm_interface.base import Session
 from orm_interface.entities.user import User
+from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
 
 smatch = Blueprint("smatch", __name__)
 session = Session()
@@ -26,3 +27,16 @@ def get_user_by_id(id):
 @smatch.route("/")
 def smatch_home():
     return "Smatch home"
+
+
+@smatch.route('/topics')
+def list_topics():
+    # cur.execute('SELECT DISTINCT category FROM courselist ORDER BY category ASC')
+    categories = session.query(Smatch_CourseList.category.distinct())\
+        .order_by(Smatch_CourseList.category).all()
+
+    topics = list()
+    for (name,) in categories:
+        topics.append(name)
+    
+    return jsonify(topics)
