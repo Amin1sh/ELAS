@@ -20,3 +20,6 @@ temp_ratings_raw: course-ratings/temp_ratings_raw.json
 upload_orm_data: orm_interface
 vdb_post_processing: scrapers/vdb_scraper/vdb_scraper/post_processing
 vdb_scraper_directory: scrapers/vdb_scraper
+udemyStatusMessage: 2022-05-10 22:15
+udxStatusMessage: 2022-05-10 22:15
+courseraStatusMessage: 2022-05-10 22:15
