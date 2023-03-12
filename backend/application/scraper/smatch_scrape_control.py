@@ -25,9 +25,9 @@ from sklearn.naive_bayes import MultinomialNB
 
 
 # for add in database
-# from orm_interface.base import Session
-# from orm_interface.entities.smatch.smatch_courselist import smatch_CourseList
-# session = Session()
+from orm_interface.base import Session
+from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
+session = Session()
 
 
 def clean_text(text):
@@ -168,22 +168,22 @@ def udemy_run(config):
     courselist = labeling_process(courselist)
 
     # save to csv
-    courselist.to_csv('courselist_data.csv')
+    # courselist.to_csv('courselist_data.csv')
 
-    # add data to database (without test)
-    # for index, row in data.iterrows():
-    #     new_item = smatch_CourseList(row['name'], row['provider'], row['level'], row['instructor'], row['description'], row['duration'], 
-    #                                  row['price'], row['link'], row['category'])
-    #     session.add(new_item)
+    # add data to database
+    for index, row in data.iterrows():
+        new_item = smatch_CourseList(row['name'], row['provider'], row['level'], row['instructor'], row['description'], row['duration'], 
+                                     row['price'], row['link'], row['category'])
+        session.add(new_item)
         
-    # try:
-    #     session.commit()
-    #     print('Ok')
-    # except Exception as e :
-    #     print('error: ', str(e))
-    #     session.rollback()
-    # finally:
-    #     session.close()
+    try:
+        session.commit()
+        print('Ok')
+    except Exception as e :
+        print('error: ', str(e))
+        session.rollback()
+    finally:
+        session.close()
 
     config["udemyStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:

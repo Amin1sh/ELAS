@@ -11,6 +11,7 @@ from orm_interface.entities.user import User
 from orm_interface.base import Base, Session, engine
 from orm_interface.entities.e3_entity.e3_courses import E3_Courses, E3_Rating
 from .scraper.scrape_control import run
+from .scraper.smatch_scrape_control import udemy_run
 
 main = Blueprint("main", __name__)
 
@@ -115,6 +116,34 @@ def scrape():
     )
     scraper.start()
     return ""
+
+
+@main.route("/udemy_scraping", methods=["GET", "POST"])
+def udemy_scrape():
+    with open(
+        os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "r"
+    ) as file:
+        config = file.read()
+    config = yaml.safe_load(config)
+
+    if request.method == "GET":
+        return {"statusMessage": config["udemyStatusMessage"]}
+
+    config["udemyStatusMessage"] = "running..."
+    with open(
+        os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "w"
+    ) as file:
+        file.write(yaml.dump(config))
+
+    scraper = Process(
+        target=udemy_run,
+        args=(
+            config,
+        ),
+    )
+    scraper.start()
+    return ""
+
 
 
 @main.route("/e3_courses_and_rating", methods=['GET'])

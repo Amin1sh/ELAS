@@ -15,11 +15,18 @@ const useStyles = makeStyles((theme) => ({
   button: {
     borderRadius: theme.spacing(1, 0.25, 1, 0.25),
   },
+  y_padding: {
+    paddingTop: "10px",
+    paddingBottom: "10px"
+  }
 }));
 
 export default function Admin(props) {
   const classes = useStyles();
   const [scrapeState, handleScrape] = useState("checking...");
+
+  const [udemyScrapeState, handleUdemyScrape] = useState("checking...")
+
   const [openScrapeDialog, setOpenScrapeDialog] = useState(false);
   const [e3, sete3] = useState("");
   const [insight, setinsight] = useState("");
@@ -34,9 +41,20 @@ export default function Admin(props) {
         .catch((error) => {
           console.log(error);
         });
+
+
+      fetch(`${process.env.REACT_APP_BASE_URL}/udemy_scraping`)
+        .then((response) => response.json())
+        .then((data) => {
+          handleUdemyScrape(data.statusMessage);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }, 2500);
     return () => clearInterval(interval);
   });
+
 
   const doScrape = (e) => {
     e.preventDefault();
@@ -53,6 +71,18 @@ export default function Admin(props) {
     handleScrape("running...");
   };
 
+  const doUdemyScrape = (e) => {
+    e.preventDefault();
+    e.target.reset();
+
+    fetch(`${process.env.REACT_APP_BASE_URL}/udemy_scraping`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    handleUdemyScrape("running...");
+  };
+
   return (
     <>
       <Grid container component="main" className={classes.root}>
@@ -63,7 +93,7 @@ export default function Admin(props) {
             Welcome, Admin!
           </Typography>
 
-          <Grid container alignItems="center">
+          <Grid container alignItems="center" className={classes.y_padding}>
             <Grid item>
               <Button
                 variant="contained"
@@ -81,6 +111,34 @@ export default function Admin(props) {
               </Typography>
             </Grid>
           </Grid>
+
+          <hr/>
+
+          <Grid container alignItems="center" className={classes.y_padding}>
+            <Grid item>
+              <form onSubmit={doUdemyScrape}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  className={classes.button}
+                  disabled={
+                    udemyScrapeState === "running..." ||
+                    udemyScrapeState === "checking..."
+                  }
+                  type="submit"
+                >
+                  Udemy Scrape courses
+                </Button>
+              </form>
+            </Grid>
+            <Grid item>
+              <Typography variant="body1" style={{ paddingLeft: 12 }}>
+                Udemy Last scraped: {udemyScrapeState}
+              </Typography>
+            </Grid>
+          </Grid>
+
         </Grid>
         <Grid item xs={false} md={2} />
       </Grid>
