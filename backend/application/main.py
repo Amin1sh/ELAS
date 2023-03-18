@@ -129,6 +129,8 @@ def udemy_scrape():
     if request.method == "GET":
         return {"statusMessage": config["udemyStatusMessage"]}
 
+    # POST
+    udemy_pagenumber = request.json["udemy_pagenumber"]
     config["udemyStatusMessage"] = "running..."
     with open(
         os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "w"
@@ -139,6 +141,8 @@ def udemy_scrape():
         target=udemy_run,
         args=(
             config,
+            udemy_pagenumber,
+            True,
         ),
     )
     scraper.start()

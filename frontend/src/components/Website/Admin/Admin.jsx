@@ -25,11 +25,14 @@ export default function Admin(props) {
   const classes = useStyles();
   const [scrapeState, handleScrape] = useState("checking...");
 
-  const [udemyScrapeState, handleUdemyScrape] = useState("checking...")
-
   const [openScrapeDialog, setOpenScrapeDialog] = useState(false);
   const [e3, sete3] = useState("");
   const [insight, setinsight] = useState("");
+
+  /* udemy */
+  const [udemyScrapeState, handleUdemyScrape] = useState("checking...")
+  const [udemyOpenScrapeDialog, setUdemyOpenScrapeDialog] = useState(false)
+  const [udemyPage, setUdemyPage] = useState(1)
 
   useEffect(() => {
     let interval = setInterval(() => {
@@ -78,7 +81,9 @@ export default function Admin(props) {
     fetch(`${process.env.REACT_APP_BASE_URL}/udemy_scraping`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        udemy_pagenumber: udemyPage
+      }),
     });
     handleUdemyScrape("running...");
   };
@@ -100,6 +105,7 @@ export default function Admin(props) {
                 color="primary"
                 size="small"
                 className={classes.button}
+                /* !True -> False, !False -> True */
                 onClick={() => setOpenScrapeDialog(!openScrapeDialog)}
               >
                 Scrape courses
@@ -116,21 +122,20 @@ export default function Admin(props) {
 
           <Grid container alignItems="center" className={classes.y_padding}>
             <Grid item>
-              <form onSubmit={doUdemyScrape}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={classes.button}
-                  disabled={
-                    udemyScrapeState === "running..." ||
-                    udemyScrapeState === "checking..."
-                  }
-                  type="submit"
-                >
-                  Udemy Scrape courses
-                </Button>
-              </form>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className={classes.button}
+                disabled={
+                  udemyScrapeState === "running..." ||
+                  udemyScrapeState === "checking..."
+                }
+                type="button"
+                onClick={() => setUdemyOpenScrapeDialog(!udemyOpenScrapeDialog)}
+              >
+                Udemy Scrape courses
+              </Button>
             </Grid>
             <Grid item>
               <Typography variant="body1" style={{ paddingLeft: 12 }}>
@@ -196,6 +201,70 @@ export default function Admin(props) {
                     Scrape Now
                   </Button>
                   <p style={{ paddingLeft: 12 }}>Last scraped: {scrapeState}</p>
+                </Grid>
+              </form>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
+
+
+
+
+
+
+
+      <Dialog
+        open={udemyOpenScrapeDialog}
+        onClose={() => setUdemyOpenScrapeDialog(!udemyOpenScrapeDialog)}
+        fullWidth={true}
+        maxWidth="sm"
+      >
+        <DialogContent style={{ height: 225 }}>
+          <Grid
+            container
+            direction="column"
+            alignItems="center"
+            justify="center"
+          >
+            <Grid item>
+              <form onSubmit={doUdemyScrape}>
+                <TextField
+                  id="udemy_page"
+                  label="Udemy Page Number (1, 2, 3, etc ..."
+                  required
+                  fullWidth
+                  type="number"
+                  InputProps={{
+                    inputProps: { 
+                        max: 1000, min: 1
+                    }
+                  }}
+                  onChange={(e) => setUdemyPage(e.target.value)}
+                  // disabled={(udemyScrapeState === "running..." || udemyScrapeState === "checking...")}
+                />
+                <Grid
+                  container
+                  direction="row"
+                  spacing={5}
+                  alignItems="center"
+                  justify="flex-start"
+                  style={{ marginTop: 36, paddingLeft: 18 }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className={classes.button}
+                    endIcon={<ArrowForwardIcon />}
+                    disabled={
+                      udemyScrapeState === "running..." ||
+                      udemyScrapeState === "checking..."
+                    }
+                    type="submit"
+                  >
+                    Scrape Now
+                  </Button>
+                  <p style={{ paddingLeft: 12 }}>Last scraped: {udemyScrapeState}</p>
                 </Grid>
               </form>
             </Grid>
