@@ -201,8 +201,90 @@ def udemy_run(config, page, store_in_database=True):
 
 ### ------------- End Udemy section -----------------
 
-### --------------- UDX section -------------------
-### ------------- End UDX section -----------------
+### --------------- EDX section -------------------
+def edx_get_page(url):
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    browser = webdriver.Chrome(options=chrome_options)
+    
+    browser.get(url)
+    name = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[1]/div/div[5]/div[1]/h1').text
+    provider = "edx"
+    try:
+        level_1 = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[3]/div/div[2]/div/div/div[1]/ul/li[3]').text
+        level = level_1.partition(": ")[2]
+    except:
+        level = "-"
+    try:
+        instructor = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[3]/div/div[2]/div/div/div[1]/ul/li[1]/a').text
+    except:
+        instructor = "-"
+    try:
+        description = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[3]/div/div[1]/div[2]/div/p[1]').text
+    except:
+        description = "-"
+    try:
+        duration = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[2]/div[2]/div/div[1]/div/div/div[1]/div/div[1]').text
+    except:
+        duration = "-"
+    try:
+        price = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[6]/div/div[2]/div/div[1]/table/tbody/tr[2]/td[1]/p').text
+    except:
+        price = "-"
+    dict = {
+        "name":name,
+        "provider":provider,
+        "level": level,
+        "instructor": instructor,
+        "description": description,
+        "duration": duration,
+        "price": price,
+        "link": url,
+        "category": None
+    }
+    print (dict)
+    return dict
+
+
+def edx_run(config, edx_url, store_in_database=True):
+    headers = ["name", "provider", "level", "instructor", "description", "duration", "price", "link", "category"]
+    data = pd.DataFrame(columns=headers)
+
+    print('url:', edx_url)
+    try:
+        blob = edx_get_page(edx_url)
+        data = data.append(blob, ignore_index=True)
+    except:
+        pass
+    
+    
+    result = labeling_process(data)
+    
+    # result
+    print('result: ', result)
+
+    if store_in_database == True:
+        # add data to database (without testing)
+        for index, row in data.iterrows():
+            new_item = Smatch_CourseList(row['name'], row['provider'], row['level'], row['instructor'], row['description'], row['duration'], 
+                                        row['price'], row['link'], row['category'])
+            session.add(new_item)
+            
+        try:
+            session.commit()
+            print('Ok')
+        except Exception as e :
+            print('error: ', str(e))
+            session.rollback()
+        finally:
+            session.close()
+    else:
+        result.to_csv("labeled_data.csv")
+        
+    config["udemyStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
+        file.write(yaml.dump(config))
+### ------------- End EDX section -----------------
 
 ### --------------- Coursera section -------------------
 ### ------------- End Coursera section -----------------

@@ -34,6 +34,11 @@ export default function Admin(props) {
   const [udemyOpenScrapeDialog, setUdemyOpenScrapeDialog] = useState(false)
   const [udemyPage, setUdemyPage] = useState(1)
 
+  /* edx */
+  const [edxScrapeState, handleEdxScrape] = useState("checking...")
+  const [edxOpenScrapeDialog, setEdxOpenScrapeDialog] = useState(false)
+  const [edxUrl, setEdxUrl] = useState("")
+
   useEffect(() => {
     let interval = setInterval(() => {
       fetch(`${process.env.REACT_APP_BASE_URL}/commence_scraping`)
@@ -50,6 +55,16 @@ export default function Admin(props) {
         .then((response) => response.json())
         .then((data) => {
           handleUdemyScrape(data.statusMessage);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+
+        fetch(`${process.env.REACT_APP_BASE_URL}/edx_scraping`)
+        .then((response) => response.json())
+        .then((data) => {
+          handleEdxScrape(data.statusMessage);
         })
         .catch((error) => {
           console.log(error);
@@ -86,6 +101,21 @@ export default function Admin(props) {
       }),
     });
     handleUdemyScrape("running...");
+  };
+
+
+  const doEdxScrape = (e) => {
+    e.preventDefault();
+    e.target.reset();
+
+    fetch(`${process.env.REACT_APP_BASE_URL}/edx_scraping`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        edx_url: edxUrl
+      }),
+    });
+    handleEdxScrape("running...");
   };
 
   return (
@@ -140,6 +170,33 @@ export default function Admin(props) {
             <Grid item>
               <Typography variant="body1" style={{ paddingLeft: 12 }}>
                 Udemy Last scraped: {udemyScrapeState}
+              </Typography>
+            </Grid>
+          </Grid>
+
+
+          <hr/>
+
+          <Grid container alignItems="center" className={classes.y_padding}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className={classes.button}
+                disabled={
+                  edxScrapeState === "running..." ||
+                  edxScrapeState === "checking..."
+                }
+                type="button"
+                onClick={() => setEdxOpenScrapeDialog(!edxOpenScrapeDialog)}
+              >
+                EDX Scrape courses
+              </Button>
+            </Grid>
+            <Grid item>
+              <Typography variant="body1" style={{ paddingLeft: 12 }}>
+                EDX Last scraped: {edxScrapeState}
               </Typography>
             </Grid>
           </Grid>
@@ -209,11 +266,6 @@ export default function Admin(props) {
       </Dialog>
 
 
-
-
-
-
-
       <Dialog
         open={udemyOpenScrapeDialog}
         onClose={() => setUdemyOpenScrapeDialog(!udemyOpenScrapeDialog)}
@@ -265,6 +317,60 @@ export default function Admin(props) {
                     Scrape Now
                   </Button>
                   <p style={{ paddingLeft: 12 }}>Last scraped: {udemyScrapeState}</p>
+                </Grid>
+              </form>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
+
+
+      <Dialog
+        open={edxOpenScrapeDialog}
+        onClose={() => setEdxOpenScrapeDialog(!edxOpenScrapeDialog)}
+        fullWidth={true}
+        maxWidth="sm"
+      >
+        <DialogContent style={{ height: 225 }}>
+          <Grid
+            container
+            direction="column"
+            alignItems="center"
+            justify="center"
+          >
+            <Grid item>
+              <form onSubmit={doEdxScrape}>
+                <TextField
+                  id="edx_url"
+                  label="EDX Page Link (URL)"
+                  required
+                  fullWidth
+                  type="url"
+                  onChange={(e) => setEdxUrl(e.target.value)}
+                  // disabled={(edxScrapeState === "running..." || edxScrapeState === "checking...")}
+                />
+                <Grid
+                  container
+                  direction="row"
+                  spacing={5}
+                  alignItems="center"
+                  justify="flex-start"
+                  style={{ marginTop: 36, paddingLeft: 18 }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className={classes.button}
+                    endIcon={<ArrowForwardIcon />}
+                    disabled={
+                      edxScrapeState === "running..." ||
+                      edxScrapeState === "checking..."
+                    }
+                    type="submit"
+                  >
+                    Scrape Now
+                  </Button>
+                  <p style={{ paddingLeft: 12 }}>Last scraped: {edxScrapeState}</p>
                 </Grid>
               </form>
             </Grid>
