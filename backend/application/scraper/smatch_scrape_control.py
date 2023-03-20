@@ -23,6 +23,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 
+import json, requests, bs4
+import pandas as pd
+
 
 # for add in database
 from orm_interface.base import Session
@@ -279,7 +282,7 @@ def edx_run(config, edx_url, store_in_database=True):
         finally:
             session.close()
     else:
-        result.to_csv("labeled_data.csv")
+        result.to_csv("edx_data.csv")
         
     config["udemyStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
@@ -287,6 +290,128 @@ def edx_run(config, edx_url, store_in_database=True):
 ### ------------- End EDX section -----------------
 
 ### --------------- Coursera section -------------------
+coursera_urls = ["https://www.classcentral.com/subject/cs?page="]
+coursera_links = []
+
+def coursera_collectlinks(lessons):
+    for lesson in lessons:
+        name = lesson.find(class_="color-charcoal course-name")
+        link = "https://www.classcentral.com" + name.get('href')
+        coursera_links.append(link)
+
+def coursera_getclasscenterlink(url):
+    print('Downloading page ' + url)
+
+    res = requests.get(url)
+    res.raise_for_status()
+    soup = bs4.BeautifulSoup(res.text, 'html.parser')
+    table = soup.find(class_="catalog-grid__results")
+    try:
+        lessons = table.find_all(class_="bg-white border-all border-gray-light padding-xsmall radius-small margin-bottom-small medium-up-padding-horz-large medium-up-padding-vert-medium course-list-course")
+    except:
+        return 1
+
+    coursera_collectlinks(lessons)
+
+def coursera_get_details(link,description):
+    if link.endswith("classroom"):
+        pass
+    else:
+        res = requests.get(link)
+        res.raise_for_status()
+        soup = bs4.BeautifulSoup(res.text, 'html.parser')
+
+        course = {
+            "name": "",
+            "instructor": "",
+            "description": description,
+            "provider": "",
+            "level": "",
+            "duration": "",
+            "price": ""
+        }
+
+        #Header
+        head = soup.find(class_="bg-white small-down-padding-medium padding-large radius-small border-all border-gray-light cmpt-grid-header margin-bottom-medium")
+        course["name"] = head.find(class_="head-1").text
+        course["instructor"] = head.find(class_="link-gray-underline text-1").get_text().strip()
+
+        #Things in Flex table
+        tables = soup.find(class_="bg-white small-down-padding-medium padding-large border-all border-gray-light radius-small margin-bottom-medium")
+        course["link"] = "https://www.classcentral.com" + tables.find(class_="margin-bottom-small btn-blue btn-medium width-100").get('href')
+        table = tables.find('ul')
+        blob = table.find_all("li")
+        for element in blob:
+
+            # Provider
+            if element.find(class_="icon-provider-charcoal icon-medium") != None:
+                course["provider"] = element.find("a").get_text().strip()
+
+            # Level
+            if element.find(class_= "icon-level-charcoal icon-medium") != None:
+                course["level"] = element.find(class_="text-2 margin-left-small line-tight").get_text().strip()
+
+            #Duration
+            if element.find(class_= "icon-clock-charcoal icon-medium") != None:
+                course["duration"] = element.find(class_="text-2 margin-left-small line-tight").get_text().strip()
+
+            #Price
+            if element.find(class_= "icon-dollar-charcoal icon-medium") != None:
+                course["price"] = element.find(class_="text-2 margin-left-small line-tight").get_text().strip()
+        return course
+
+def coursera_getcourselink():
+    for urlr in coursera_urls:
+        i = 1
+        done = 0
+        #while done != 1:
+        while i != 10:
+            url = urlr + str(i)
+            done = coursera_getclasscenterlink(url)
+            i = i+1
+
+    textfile = open("a_file.txt", "w")
+    for element in coursera_links:
+        textfile.write(element + "\n")
+    textfile.close()
+
+
+def coursera_run(config, coursera_url, coursera_description, store_in_database=True):
+    headers = ["name", "provider", "level", "instructor", "description", "duration", "price", "link"]
+    data = pd.DataFrame(columns=headers)
+    
+    try:
+        course = coursera_get_details(coursera_url, coursera_description)
+        data = data.append(course, ignore_index=True)
+    except:
+        pass
+
+    result = labeling_process(data)
+    
+    # result
+    print('result: ', result)
+
+    if store_in_database == True:
+        # add data to database (without testing)
+        for index, row in data.iterrows():
+            new_item = Smatch_CourseList(row['name'], row['provider'], row['level'], row['instructor'], row['description'], row['duration'], 
+                                        row['price'], row['link'], row['category'])
+            session.add(new_item)
+            
+        try:
+            session.commit()
+            print('Ok')
+        except Exception as e :
+            print('error: ', str(e))
+            session.rollback()
+        finally:
+            session.close()
+    else:
+        result.to_csv("coursera_data.csv")
+        
+    config["udemyStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
+        file.write(yaml.dump(config))
 ### ------------- End Coursera section -----------------
 
 

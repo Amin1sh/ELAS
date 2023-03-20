@@ -11,7 +11,7 @@ from orm_interface.entities.user import User
 from orm_interface.base import Base, Session, engine
 from orm_interface.entities.e3_entity.e3_courses import E3_Courses, E3_Rating
 from .scraper.scrape_control import run
-from .scraper.smatch_scrape_control import udemy_run, edx_run
+from .scraper.smatch_scrape_control import udemy_run, edx_run, coursera_run
 
 main = Blueprint("main", __name__)
 
@@ -173,6 +173,39 @@ def edx_scrape():
         args=(
             config,
             edx_url,
+            True,
+        ),
+    )
+    scraper.start()
+    return ""
+
+
+@main.route("/coursera_scraping", methods=["GET", "POST"])
+def coursera_scrape():
+    with open(
+        os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "r"
+    ) as file:
+        config = file.read()
+    config = yaml.safe_load(config)
+
+    if request.method == "GET":
+        return {"statusMessage": config["courseraStatusMessage"]}
+
+    # POST
+    coursera_url = request.json["coursera_url"]
+    coursera_description = request.json["coursera_description"]
+    config["courseraStatusMessage"] = "running..."
+    with open(
+        os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "w"
+    ) as file:
+        file.write(yaml.dump(config))
+
+    scraper = Process(
+        target=coursera_run,
+        args=(
+            config,
+            coursera_url,
+            coursera_description,
             True,
         ),
     )
