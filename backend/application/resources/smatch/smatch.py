@@ -3,8 +3,12 @@ from orm_interface.base import Session
 from orm_interface.entities.user import User
 from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
 
+from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required
+
 smatch = Blueprint("smatch", __name__)
 session = Session()
+
+jwt_mng = JWTManager()
 
 def get_user(username):
     
@@ -25,8 +29,11 @@ def get_user_by_id(id):
 
 @smatch.route("/home")
 @smatch.route("/")
+@jwt_required()
 def smatch_home():
-    return "Smatch home"
+    user_data = get_jwt_identity()
+
+    return f"Smatch home, {user_data['id']}, {user_data['email']}, {user_data['firstname']}, {user_data['lastname']}"
 
 
 @smatch.route('/topics')

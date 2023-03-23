@@ -54,6 +54,7 @@ def login():
         if bcrypt.check_password_hash(user.password, password):
             access_token = create_access_token(
                 identity={
+                    "id": user.id,
                     "firstname": user.firstname,
                     "lastname": user.lastname,
                     "email": user.email,
