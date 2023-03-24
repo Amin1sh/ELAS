@@ -126,3 +126,92 @@ def new_thread():
         session.close()
     
     abort(400)
+
+
+# Add new replies on the thread with thread_id
+@smatch.route('/threads/<thread_id>/replies', methods = ['POST'])
+@jwt_required()
+def new_reply(thread_id):
+    user_id = get_jwt_identity()['id']
+
+    body = request.json.get('body')
+
+    # cur.execute('INSERT INTO replies (user_id, thread_id, body) VALUES (%s, %s, %s)', (user.id, thread_id, body))
+    new_item = smatch_Reply(user_id=user_id, thread_id=thread_id, body=body)
+    session.add(new_item)
+
+    try:
+        session.commit()
+        return {}, 201
+    except Exception as e :
+        print(str(e))
+        session.rollback()
+    finally:
+        session.close()
+    
+    abort(400)
+
+
+
+
+
+visualization_queries = {
+    "instructors": "SELECT count(*), instructor FROM smatch_courselist WHERE instructor IS NOT NULL GROUP BY instructor ORDER BY count DESC LIMIT 20",
+    "providers": "SELECT count(*), provider FROM smatch_courselist WHERE provider IS NOT NULL GROUP BY provider ORDER BY count DESC LIMIT 20",
+    "categories": "SELECT count(*), coalesce(category, 'Other') category FROM smatch_courselist GROUP BY category ORDER BY count DESC LIMIT 20",
+    "levels": "SELECT count(*), level FROM smatch_courselist GROUP BY level ORDER BY count DESC",
+    "duration_-": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL GROUP BY duration ORDER BY count DESC",
+    "duration_Beginner": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'Beginner' GROUP BY duration ORDER BY count DESC",
+    "duration_Intermediate": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'Intermediate' GROUP BY duration ORDER BY count DESC",
+    "duration_Advanced": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'Advanced' GROUP BY duration ORDER BY count DESC",
+    "duration_All": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'All' GROUP BY duration ORDER BY count DESC",
+    "price_-": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL GROUP BY price ORDER BY count DESC",
+    "price_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'Beginner' GROUP BY price ORDER BY count DESC",
+    "price_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'Intermediate' GROUP BY price ORDER BY count DESC",
+    "price_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'Advanced' GROUP BY price ORDER BY count DESC",
+    "price_All": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'All' GROUP BY price ORDER BY count DESC",
+    "terms": "SELECT * FROM smatch_matched_terms ORDER BY count DESC LIMIT 50"
+};
+
+@smatch.route('/visualization/<name>')
+@jwt_required()
+def visualization(name):
+    # cur.execute(visualization_queries[name])
+    # result = cur.fetchall()
+    result = session.execute(visualization_queries[name]).fetchall()
+    return jsonify(result)
+
+
+@smatch.route('/current_user')
+@jwt_required()
+def current_user():
+    #user = auth.current_user()
+    user_id = get_jwt_identity()['id']
+    user = session.query(User).filter(User.id == user_id).first()
+    user['username'] = user['email']
+    return jsonify(user)
+
+@smatch.route('/current_user', methods = ['POST'])
+@jwt_required()
+def update_username():
+    user_id = get_jwt_identity()['id']
+
+    username = request.json.get('username')
+
+    user = session.query(User).filter(User.email == username).first()
+
+    if user:
+        user['email'] = username
+
+        try:
+            session.commit()
+            return {}
+        except Exception as e :
+            print(str(e))
+            session.rollback()
+        finally:
+            session.close()
+    
+    abort(400)
+
+
