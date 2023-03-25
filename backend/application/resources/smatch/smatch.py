@@ -5,6 +5,8 @@ from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
 
 from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required
 
+from .recommender import make_clusters
+
 smatch = Blueprint("smatch", __name__)
 session = Session()
 
@@ -215,3 +217,9 @@ def update_username():
     abort(400)
 
 
+@smatch.route('/generate_clusters', methods = ['POST'])
+@jwt_required()
+def generate_clusters():
+    filters = request.json
+    (clusters, terms) = make_clusters(filters)
+    return jsonify({ "clusters": clusters.to_dict('records'), "terms": terms.to_dict('records') })
