@@ -223,3 +223,39 @@ def generate_clusters():
     filters = request.json
     (clusters, terms) = make_clusters(filters)
     return jsonify({ "clusters": clusters.to_dict('records'), "terms": terms.to_dict('records') })
+
+
+@smatch.route('/course/<id>')
+@jwt_required()
+def get_course(id):
+    # cur.execute('SELECT * FROM courselist WHERE id = %s', (id,))
+    course = session.query(Smatch_CourseList).filter(Smatch_CourseList.id == id).first()
+
+    return jsonify(course)
+
+
+@smatch.route('/swiped_terms', methods = ['POST'])
+@jwt_required()
+def swiped_terms():
+    terms = request.json.get('terms')
+
+    for term in terms:
+        # cur.execute('INSERT INTO matched_terms (term, count) VALUES (%s, 1) ON CONFLICT (term) DO UPDATE SET count = matched_terms.count + 1', (term,))
+        sel_term_item = session.query(Smatch_MatchedTerm).filter(Smatch_MatchedTerm.term == term).first()
+        if sel_term_item:
+            sel_term_item.count = sel_term_item.count + 1
+        else:
+            new_item = Smatch_MatchedTerm(term=term, count=1)
+            session.add(new_item)
+            session.flush()
+
+    try:
+        session.commit()
+        return jsonify({}), 201
+    except Exception as e :
+        print(str(e))
+        session.rollback()
+    finally:
+        session.close()
+
+    abort(400)
