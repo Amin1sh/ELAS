@@ -1,7 +1,9 @@
 courseInsightsTargetFile: bin/studyprograms.js
 courseScraper: uni-due-course-catalog-scraper
+courseraStatusMessage: 2022-05-10 22:15
 e3RatingsFile: bin/avg_ratings.json
 e3TargetFile: bin/e3_courses.json
+edxStatusMessage: 2023-04-06 18:14
 lsf_post_processing: scrapers/lsf_scraper/lsf_scraper/post_processing
 lsf_scraper_directory: scrapers/lsf_scraper
 merge_data_post_processing_directory: scrapers
@@ -17,9 +19,7 @@ statusMessage: 2022-05-10 22:15
 temp_e3_directory: uni-due-course-catalog-scraper/temp_e3.json
 temp_ratings: course-ratings/course_ratings/data/temp_ratings.json
 temp_ratings_raw: course-ratings/temp_ratings_raw.json
+udemyStatusMessage: 2022-05-10 22:15
 upload_orm_data: orm_interface
 vdb_post_processing: scrapers/vdb_scraper/vdb_scraper/post_processing
 vdb_scraper_directory: scrapers/vdb_scraper
-udemyStatusMessage: 2022-05-10 22:15
-edxStatusMessage: 2022-05-10 22:15
-courseraStatusMessage: 2022-05-10 22:15

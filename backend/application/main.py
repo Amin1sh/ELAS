@@ -11,7 +11,7 @@ from orm_interface.entities.user import User
 from orm_interface.base import Base, Session, engine
 from orm_interface.entities.e3_entity.e3_courses import E3_Courses, E3_Rating
 from .scraper.scrape_control import run
-from .scraper.smatch_scrape_control import udemy_run, edx_run, coursera_run
+from .scraper.smatch_scrape_control import edx_run, coursera_run
 
 main = Blueprint("main", __name__)
 
@@ -119,37 +119,6 @@ def scrape():
     return ""
 
 
-@main.route("/udemy_scraping", methods=["GET", "POST"])
-def udemy_scrape():
-    with open(
-        os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "r"
-    ) as file:
-        config = file.read()
-    config = yaml.safe_load(config)
-
-    if request.method == "GET":
-        return {"statusMessage": config["udemyStatusMessage"]}
-
-    # POST
-    udemy_pagenumber = request.json["udemy_pagenumber"]
-    config["udemyStatusMessage"] = "running..."
-    with open(
-        os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "w"
-    ) as file:
-        file.write(yaml.dump(config))
-
-    scraper = Process(
-        target=udemy_run,
-        args=(
-            config,
-            udemy_pagenumber,
-            True,
-        ),
-    )
-    scraper.start()
-    return ""
-
-
 @main.route("/edx_scraping", methods=["GET", "POST"])
 def edx_scrape():
     with open(
@@ -162,7 +131,6 @@ def edx_scrape():
         return {"statusMessage": config["edxStatusMessage"]}
 
     # POST
-    edx_url = request.json["udx_url"]
     config["edxStatusMessage"] = "running..."
     with open(
         os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "w"
@@ -173,7 +141,6 @@ def edx_scrape():
         target=edx_run,
         args=(
             config,
-            edx_url,
             True,
         ),
     )

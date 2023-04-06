@@ -26,6 +26,14 @@ from sklearn.naive_bayes import MultinomialNB
 import json, requests, bs4
 import pandas as pd
 
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+import random
 
 # for add in database
 from orm_interface.base import Session
@@ -87,153 +95,68 @@ def labeling_process(data):
     data = data.loc[:, ~data.columns.str.contains('clean_name')]
     return data
 
-### --------------- Udemy section -------------------
-client_ID = "FPjQAWG0Dd4vejVo6Tu1jurZoamF1zQbOob0k8Q7"
-client_secret = "wLo0LigtQI1KyUHCVNbKpgLY9vYZchySspzYAwqAn8mMnxzpdWMUmV5eP7sw8GLI38X0EMlT5N3ZENzgTpvK7CGVoNI3RR88eZ0GF6ssJvlrZNi34MbhVUCj6VUYq4wq"
-
-
-client_id_secret = f"{client_ID}:{client_secret}"
-
-#b64_client_id_secret = base64.b64encode(client_id_secret)
-
-
-s = requests.session()
-s.headers = {'Authorization': 'Basic RlBqUUFXRzBEZDR2ZWpWbzZUdTFqdXJab2FtRjF6UWJPb2IwazhRNzp3TG8wTGlndFFJMUt5VUhDVk5iS3BnTFk5dllaY2h5U3NwellBd3FBbjhtTW54enBkV01VbVY1ZVA3c3c4R0xJMzhYMEVNbFQ1TjNaRU56Z1Rwdks3Q0dWb05JM1JSODhlWjBHRjZzc0p2bHJaTmkzNE1iaFZVQ2o2VlVZcTR3cQ=='}
-
-#instructional_levels = ["beginner","intermediate","expert"]
-#categories =["Business", "Design", "Development", "Finance & Accounting", "Health & Fitness", "IT & Software", "Lifestyle", "Marketing", "Music" ,"Office", "Productivity", "Personal Development", "Photography & Video", "Teaching & Academics", "Udemy Free Resource Center", "Vodafone"]
-#durations = {"short":"1-3 Hours","medium":"3-6 Hours","long":"6-17 Hours","extralong":"17+ Hours"}
-
-instructional_levels = ["beginner"]
-categories =["Business"]
-durations = {"short":"1-3 Hours"}
-
-def udemy_run(config, page, store_in_database=True):
-    # scrape
-    headers = ["name", "provider", "level", "instructor", "description", "duration", "price", "link", "category"]
-    courselist = pd.DataFrame(columns=headers)
-    
-    udemy_url = 'https://www.udemy.com/api-2.0/courses/?page=' + str(page) + '&page_size=100'
-
-
-    for instructional_level in instructional_levels:
-        for category in categories:
-            for key, value in durations.items():
-                sc = 200
-                print('url:', udemy_url)
-                args = {
-                    "instructional_level" : instructional_level,
-                    "duration": key,
-                    "language" : "eng",
-                    "category" : category,
-                    "ratings" : 5
-                }
-
-                r = s.get(udemy_url)
-                sc = r.status_code
-                print('Status Code:', sc)
-                if sc != 200:
-                    break
-                else:
-                    print(r.status_code)
-                    parsed_response = json.loads(r.text)
-
-                    df = pd.json_normalize(parsed_response['results'])
-                    try:
-                        df["instructor"] = [d[0].get('title') for d in df.visible_instructors]
-                    except:
-                        df["instructor"]= "-"
-
-                    try:
-                        df["num_reviews"] = [d[0].get('title') for d in df.num_reviews]
-                    except:
-                        df["num_reviews"]= "-"
-
-                    for index, row in df.iterrows():
-                        url = "https://www.udemy.com" + row["url"]
-                        instructor =row["instructor"]
-
-                        if str(row["price"]).upper().strip() == 'FREE':
-                            row["price"] = '0'
-                        else:
-                            row["price"] = str(row["price"]).replace('€', '').replace('$', '').replace(',', '').strip()
-
-                        dict = {
-                            "name": row["title"],
-                            "provider": "Udemy",
-                            "level": instructional_level,
-                            "instructor": instructor,
-                            "description": row["headline"],
-                            "duration": value,
-                            "price": row["price"],
-                            "category" : category,
-                            "link": url}
-
-                        print('Data:', dict)
-
-                        courselist = courselist.append(dict, ignore_index=True)
-
-    # courselist
-    courselist = labeling_process(courselist)
-
-    if store_in_database == True:
-        # add data to database
-        for index, row in courselist.iterrows():
-            new_item = Smatch_CourseList(row['name'], row['provider'], row['level'], row['instructor'], row['description'], row['duration'], 
-                                         row['price'], row['link'], row['category'])
-            session.add(new_item)
-            session.flush()
-            
-        try:
-            session.commit()
-            print('Ok')
-        except Exception as e :
-            print('error: ', str(e))
-            session.rollback()
-        finally:
-            session.close()
-    else:
-        # save to csv
-        courselist.to_csv('courselist_data.csv')
-
-    config["udemyStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-    with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
-        file.write(yaml.dump(config))
-    
-    print('Finished')
-
-### ------------- End Udemy section -----------------
 
 ### --------------- EDX section -------------------
 def edx_get_page(url):
     chrome_options = Options()
+    chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument("--headless")
     browser = webdriver.Chrome(options=chrome_options)
     
     browser.get(url)
-    name = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[1]/div/div[5]/div[1]/h1').text
+    name = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[1]/div[1]/div[5]/div[1]/h1").text
     provider = "edx"
+    
     try:
-        level_1 = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[3]/div/div[2]/div/div/div[1]/ul/li[3]').text
+        level_1 = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[3]").text
         level = level_1.partition(": ")[2]
     except:
         level = "-"
+        
+    
     try:
-        instructor = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[3]/div/div[2]/div/div/div[1]/ul/li[1]/a').text
+        subject = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[2]").text
+        subject = subject.partition(": ")[2]
+    except:
+        subject = "-"
+    
+    
+    try:
+        instructor = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[1]/a").text
     except:
         instructor = "-"
+    
+    
     try:
-        description = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[3]/div/div[1]/div[2]/div/p[1]').text
+        description = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[1]/div[2]/div[1]").text
     except:
         description = "-"
+    
+    
     try:
-        duration = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[2]/div[2]/div/div[1]/div/div/div[1]/div/div[1]').text
+        duration_1 = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]").text
+        duration_1 = duration_1.split(" ")[0]
+        duration_2 = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]").text
+        duration_2 = duration_2.split(" ")[0].split("–")[0]
+        duration = str((int(duration_1.strip()) * int(duration_2.strip())))
     except:
-        duration = "-"
+        duration = "0"
+    
     try:
-        price = browser.find_element(by=By.XPATH, value='//*[@id="main-content"]/div/div[6]/div/div[2]/div/div[1]/table/tbody/tr[2]/td[1]/p').text
+        price = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[2]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]").text
+        price = price.upper().strip()
+        price = '0' if price == 'FREE' else  str(price).replace('€', '').replace('$', '').replace(',', '').strip()
+        price = int(price)
     except:
-        price = "-"
+        try:
+            price = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[2]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[2]").text
+            price = price.upper().strip()
+            price = '0' if price == 'FREE' else  str(price).replace('€', '').replace('$', '').replace(',', '').strip()
+            # price = int(price)
+        except:
+            price = "0"
+        
+        
     dict = {
         "name":name,
         "provider":provider,
@@ -243,28 +166,105 @@ def edx_get_page(url):
         "duration": duration,
         "price": price,
         "link": url,
-        "category": None
+        "category": subject
     }
-    print (dict)
+    
+    browser.close()
+    
     return dict
 
 
-def edx_run(config, edx_url, store_in_database=True):
+
+def edx_run(config, store_in_database=True):
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument('--no-sandbox')
+    browser = webdriver.Chrome(options=chrome_options)
+
     headers = ["name", "provider", "level", "instructor", "description", "duration", "price", "link", "category"]
     data = pd.DataFrame(columns=headers)
 
-    print('url:', edx_url)
+    print('Start edx scraping...')
+    browser.get(f'https://www.edx.org/search?tab=course')
+    time.sleep(5)
+    browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+    time.sleep(3)
+    
+    # find the number of pages
     try:
-        blob = edx_get_page(edx_url)
-        data = data.append(blob, ignore_index=True)
+        xpath = "//ul[contains(@class, 'pagination')]/li[6]/button"
+        last_page_number = browser.find_element(by=By.XPATH, value=xpath).text
+        last_page_number = int(str(last_page_number).strip())
+        print('Last page number:', last_page_number)
     except:
-        pass
+        print("Can't found last page number")
+        last_page_number = 42
+
+    browser.close()
+
+    # last_page_number = 1
+        
+    for page_number in range(1, (last_page_number + 1)):
+        browser = webdriver.Chrome(options=chrome_options)
+        # try:
+        #     browser.execute_script("window.localStorage.clear();")
+        #     browser.execute_script("window.sessionStorage.clear();")
+        #     browser.execute_script("window.location.reload();")
+        # except Exception as e:
+        #     print('Error in clear browser cache', str(e))
+        #     pass
+
+        #time.sleep(3) # 42 * 3 s
+        print('Page:', page_number)
+
+        retries = 3
+        while retries > 0:
+            try:
+                browser.get(f'https://www.edx.org/search?tab=course&page={str(page_number)}')
+                time.sleep(5)
+                browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+                time.sleep(3)
+                break
+            except Exception as e:
+                print('Try Error:', str(e))
+                retries = retries - 1
+                pass
+
+        if retries == 0:
+            continue
+
+        # scrape list of courses url
+        list_of_courses = []
+        for i in range(1, 25):
+            try:
+                xpath = f'//*[@id="main-content"]/div/div[4]/div[2]/div[{str(i)}]/a'
+                link = browser.find_element(by=By.XPATH, value=xpath).get_attribute('href')
+                list_of_courses.append(link)
+            except Exception as e:
+                if i == 1:
+                    break
+        
+        browser.close()
+                
+        for page_url in list_of_courses:
+            # s_rnd = random.randint(10, 30)
+            # time.sleep(s_rnd) # 42 * 24 * 10-30 s
+            try:
+                course_info = edx_get_page(page_url)
+                data = data.append(course_info, ignore_index=True)
+                if store_in_database == False:
+                    data.to_csv('edx_before_labeling.csv')
+            except Exception as e:
+                print(f'Error in scraping url[{page_url}]:', str(e))
+                pass
+
     
-    
-    result = labeling_process(data)
-    
+
+
+    result = labeling_process(data)    
+
     # result
-    print('result: ', result)
+    # print('result: ', result)
 
     if store_in_database == True:
         # add data to database (without testing)
@@ -284,7 +284,7 @@ def edx_run(config, edx_url, store_in_database=True):
     else:
         result.to_csv("edx_data.csv")
         
-    config["udemyStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    config["edxStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
         file.write(yaml.dump(config))
 ### ------------- End EDX section -----------------
@@ -421,10 +421,7 @@ if __name__ == "__main__":
         config = file.read()
     config = yaml.safe_load(config)
 
-    page = 1
-
-    udemy_run(
+    edx_run(
         config,
-        page,
         False
     )

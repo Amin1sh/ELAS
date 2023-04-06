@@ -29,15 +29,9 @@ export default function Admin(props) {
   const [e3, sete3] = useState("");
   const [insight, setinsight] = useState("");
 
-  /* udemy */
-  const [udemyScrapeState, handleUdemyScrape] = useState("checking...")
-  const [udemyOpenScrapeDialog, setUdemyOpenScrapeDialog] = useState(false)
-  const [udemyPage, setUdemyPage] = useState(1)
-
+  
   /* edx */
   const [edxScrapeState, handleEdxScrape] = useState("checking...")
-  const [edxOpenScrapeDialog, setEdxOpenScrapeDialog] = useState(false)
-  const [edxUrl, setEdxUrl] = useState("")
 
   /* coursera */
   const [courseraScrapeState, handleCourseraScrape] = useState("checking...")
@@ -58,15 +52,7 @@ export default function Admin(props) {
         });
 
 
-      fetch(`${process.env.REACT_APP_BASE_URL}/udemy_scraping`)
-        .then((response) => response.json())
-        .then((data) => {
-          handleUdemyScrape(data.statusMessage);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-
+      
 
         fetch(`${process.env.REACT_APP_BASE_URL}/edx_scraping`)
         .then((response) => response.json())
@@ -107,20 +93,7 @@ export default function Admin(props) {
     handleScrape("running...");
   };
 
-  const doUdemyScrape = (e) => {
-    e.preventDefault();
-    e.target.reset();
-
-    fetch(`${process.env.REACT_APP_BASE_URL}/udemy_scraping`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        udemy_pagenumber: udemyPage
-      }),
-    });
-    handleUdemyScrape("running...");
-  };
-
+  
 
   const doEdxScrape = (e) => {
     e.preventDefault();
@@ -129,9 +102,7 @@ export default function Admin(props) {
     fetch(`${process.env.REACT_APP_BASE_URL}/edx_scraping`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        edx_url: edxUrl
-      }),
+      body: JSON.stringify({}),
     });
     handleEdxScrape("running...");
   };
@@ -182,37 +153,14 @@ export default function Admin(props) {
             </Grid>
           </Grid>
 
-          <hr/>
-
-          <Grid container alignItems="center" className={classes.y_padding}>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className={classes.button}
-                disabled={
-                  udemyScrapeState === "running..." ||
-                  udemyScrapeState === "checking..."
-                }
-                type="button"
-                onClick={() => setUdemyOpenScrapeDialog(!udemyOpenScrapeDialog)}
-              >
-                Udemy Scrape courses
-              </Button>
-            </Grid>
-            <Grid item>
-              <Typography variant="body1" style={{ paddingLeft: 12 }}>
-                Udemy Last scraped: {udemyScrapeState}
-              </Typography>
-            </Grid>
-          </Grid>
+         
 
 
           <hr/>
 
           <Grid container alignItems="center" className={classes.y_padding}>
             <Grid item>
+            <form onSubmit={doEdxScrape}>
               <Button
                 variant="contained"
                 color="primary"
@@ -222,11 +170,11 @@ export default function Admin(props) {
                   edxScrapeState === "running..." ||
                   edxScrapeState === "checking..."
                 }
-                type="button"
-                onClick={() => setEdxOpenScrapeDialog(!edxOpenScrapeDialog)}
+                type="submit"
               >
                 EDX Scrape courses
               </Button>
+              </form>
             </Grid>
             <Grid item>
               <Typography variant="body1" style={{ paddingLeft: 12 }}>
@@ -327,119 +275,8 @@ export default function Admin(props) {
       </Dialog>
 
 
-      <Dialog
-        open={udemyOpenScrapeDialog}
-        onClose={() => setUdemyOpenScrapeDialog(!udemyOpenScrapeDialog)}
-        fullWidth={true}
-        maxWidth="sm"
-      >
-        <DialogContent style={{ height: 225 }}>
-          <Grid
-            container
-            direction="column"
-            alignItems="center"
-            justify="center"
-          >
-            <Grid item>
-              <form onSubmit={doUdemyScrape}>
-                <TextField
-                  id="udemy_page"
-                  label="Udemy Page Number (1, 2, 3, etc ..."
-                  required
-                  fullWidth
-                  type="number"
-                  InputProps={{
-                    inputProps: { 
-                        max: 1000, min: 1
-                    }
-                  }}
-                  onChange={(e) => setUdemyPage(e.target.value)}
-                  // disabled={(udemyScrapeState === "running..." || udemyScrapeState === "checking...")}
-                />
-                <Grid
-                  container
-                  direction="row"
-                  spacing={5}
-                  alignItems="center"
-                  justify="flex-start"
-                  style={{ marginTop: 36, paddingLeft: 18 }}
-                >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className={classes.button}
-                    endIcon={<ArrowForwardIcon />}
-                    disabled={
-                      udemyScrapeState === "running..." ||
-                      udemyScrapeState === "checking..."
-                    }
-                    type="submit"
-                  >
-                    Scrape Now
-                  </Button>
-                  <p style={{ paddingLeft: 12 }}>Last scraped: {udemyScrapeState}</p>
-                </Grid>
-              </form>
-            </Grid>
-          </Grid>
-        </DialogContent>
-      </Dialog>
-
-
-      <Dialog
-        open={edxOpenScrapeDialog}
-        onClose={() => setEdxOpenScrapeDialog(!edxOpenScrapeDialog)}
-        fullWidth={true}
-        maxWidth="sm"
-      >
-        <DialogContent style={{ height: 225 }}>
-          <Grid
-            container
-            direction="column"
-            alignItems="center"
-            justify="center"
-          >
-            <Grid item>
-              <form onSubmit={doEdxScrape}>
-                <TextField
-                  id="edx_url"
-                  label="EDX Page Link (URL)"
-                  required
-                  fullWidth
-                  type="url"
-                  onChange={(e) => setEdxUrl(e.target.value)}
-                  // disabled={(edxScrapeState === "running..." || edxScrapeState === "checking...")}
-                />
-                <Grid
-                  container
-                  direction="row"
-                  spacing={5}
-                  alignItems="center"
-                  justify="flex-start"
-                  style={{ marginTop: 36, paddingLeft: 18 }}
-                >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className={classes.button}
-                    endIcon={<ArrowForwardIcon />}
-                    disabled={
-                      edxScrapeState === "running..." ||
-                      edxScrapeState === "checking..."
-                    }
-                    type="submit"
-                  >
-                    Scrape Now
-                  </Button>
-                  <p style={{ paddingLeft: 12 }}>Last scraped: {edxScrapeState}</p>
-                </Grid>
-              </form>
-            </Grid>
-          </Grid>
-        </DialogContent>
-      </Dialog>
-
-
+      
+      
       <Dialog
         open={courseraOpenScrapeDialog}
         onClose={() => setCourseraOpenScrapeDialog(!courseraOpenScrapeDialog)}
