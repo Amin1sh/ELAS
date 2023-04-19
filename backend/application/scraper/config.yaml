@@ -3,7 +3,7 @@ courseScraper: uni-due-course-catalog-scraper
 courseraStatusMessage: 2022-05-10 22:15
 e3RatingsFile: bin/avg_ratings.json
 e3TargetFile: bin/e3_courses.json
-edxStatusMessage: 2023-04-06 18:14
+edxStatusMessage: 2022-05-10 22:15
 lsf_post_processing: scrapers/lsf_scraper/lsf_scraper/post_processing
 lsf_scraper_directory: scrapers/lsf_scraper
 merge_data_post_processing_directory: scrapers

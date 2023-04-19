@@ -35,9 +35,6 @@ export default function Admin(props) {
 
   /* coursera */
   const [courseraScrapeState, handleCourseraScrape] = useState("checking...")
-  const [courseraOpenScrapeDialog, setCourseraOpenScrapeDialog] = useState(false)
-  const [courseraUrl, setCourseraUrl] = useState("")
-  const [courseraDescription, setCourseraDescription] = useState("")
 
 
   useEffect(() => {
@@ -115,10 +112,7 @@ export default function Admin(props) {
     fetch(`${process.env.REACT_APP_BASE_URL}/coursera_scraping`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        coursera_url: courseraUrl,
-        coursera_description: courseraDescription
-      }),
+      body: JSON.stringify({}),
     });
     handleCourseraScrape("running...");
   };
@@ -188,20 +182,21 @@ export default function Admin(props) {
 
           <Grid container alignItems="center" className={classes.y_padding}>
             <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className={classes.button}
-                disabled={
-                  courseraScrapeState === "running..." ||
-                  courseraScrapeState === "checking..."
-                }
-                type="button"
-                onClick={() => setCourseraOpenScrapeDialog(!courseraOpenScrapeDialog)}
-              >
-                Coursera Scrape courses
-              </Button>
+              <form onSubmit={doCourseraScrape}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  className={classes.button}
+                  disabled={
+                    courseraScrapeState === "running..." ||
+                    courseraScrapeState === "checking..."
+                  }
+                  type="submit"
+                >
+                  Coursera Scrape courses
+                </Button>
+              </form>
             </Grid>
             <Grid item>
               <Typography variant="body1" style={{ paddingLeft: 12 }}>
@@ -277,67 +272,7 @@ export default function Admin(props) {
 
       
       
-      <Dialog
-        open={courseraOpenScrapeDialog}
-        onClose={() => setCourseraOpenScrapeDialog(!courseraOpenScrapeDialog)}
-        fullWidth={true}
-        maxWidth="sm"
-      >
-        <DialogContent style={{ height: 225 }}>
-          <Grid
-            container
-            direction="column"
-            alignItems="center"
-            justify="center"
-          >
-            <Grid item>
-              <form onSubmit={doCourseraScrape}>
-                <TextField
-                  id="coursera_url"
-                  label="Coursera Page Link (URL)"
-                  required
-                  fullWidth
-                  type="url"
-                  onChange={(e) => setCourseraUrl(e.target.value)}
-                  // disabled={(courseraScrapeState === "running..." || courseraScrapeState === "checking...")}
-                />
-                <TextField
-                  id="coursera_description"
-                  label="Coursera Description"
-                  required
-                  fullWidth
-                  type="text"
-                  onChange={(e) => setCourseraDescription(e.target.value)}
-                  // disabled={(courseraScrapeState === "running..." || courseraScrapeState === "checking...")}
-                />
-                <Grid
-                  container
-                  direction="row"
-                  spacing={5}
-                  alignItems="center"
-                  justify="flex-start"
-                  style={{ marginTop: 36, paddingLeft: 18 }}
-                >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className={classes.button}
-                    endIcon={<ArrowForwardIcon />}
-                    disabled={
-                      courseraScrapeState === "running..." ||
-                      courseraScrapeState === "checking..."
-                    }
-                    type="submit"
-                  >
-                    Scrape Now
-                  </Button>
-                  <p style={{ paddingLeft: 12 }}>Last scraped: {courseraScrapeState}</p>
-                </Grid>
-              </form>
-            </Grid>
-          </Grid>
-        </DialogContent>
-      </Dialog>
+      
     </>
   );
 }

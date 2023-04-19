@@ -160,8 +160,6 @@ def coursera_scrape():
         return {"statusMessage": config["courseraStatusMessage"]}
 
     # POST
-    coursera_url = request.json["coursera_url"]
-    coursera_description = request.json["coursera_description"]
     config["courseraStatusMessage"] = "running..."
     with open(
         os.path.join(os.path.dirname(__file__), "scraper", "config.yaml"), "w"
@@ -172,8 +170,6 @@ def coursera_scrape():
         target=coursera_run,
         args=(
             config,
-            coursera_url,
-            coursera_description,
             True,
         ),
     )
