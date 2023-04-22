@@ -1,66 +1,51 @@
-import React, {useEffect, useState} from 'react';
-import Backend from "../../../assets/functions/Backend";
-import "./smatch-styles.css";
-import { NavLink } from "react-router-dom";
-import Explore from "./components/Explore";
+import React from 'react';
+import { Container, Box } from '@material-ui/core';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
-const SMATCHLogo = () => <img src="images/smatch.jpg" width="200px" height="150px" />;
-const CogIcon = () => <img src="icons/cog.svg" />;
+import smatchStyle from './smatch-style';
+import NavigationItem from './components/NavigationItem/NavigationItem';
+
+import HomePage from './components/HomePage/homepage';
+import ForumPage from './components/ForumPage/forumpage';
+import MatchesPage from './components/MatchesPage/matchespage';
+import MatchPage from './components/MatchPage/matchpage';
+import VisualizationPage from './components/VisualizationPage/visualizationpage';
+
 const HomeIcon = () => <img src="icons/home.svg" />;
 const MessageIcon = () => <img src="icons/message.svg" />;
 const ViewListIcon = () => <img src="icons/view-list.svg" />;
 const ChartBarIcon = () => <img src="icons/chart-bar.svg" />;
 
-
-const NavigationItem = ({ icon, to, badge }) => {
-  return (
-    <NavLink to={to} className={({ isActive }) => `fill-amber-500 ${isActive ? "w-12 h-12" : "w-8 h-8"} relative`}>
-      {React.cloneElement(icon, { className: "w-full h-full" })}
-      {badge ? (
-        <span className="absolute -top-1 -right-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{badge}</span>
-      ) : <></>}
-    </NavLink>
-  );
-}
-
-
-const Smatch = () => {
-  const [greeting, setGreeting] = useState("");
-
-  useEffect(() => {
-    Backend.get("/smatch/home").then((response) => {
-      let res = response.data
-      setGreeting(res)
-    });
-  })
+export default function Smatch() {
+  const classes = smatchStyle();
 
   return (
-    // Remove bg-slate-800 to have the Elas background
-    <div className="flex flex-col items-center justify-between min-h-screen">
-      <div className="w-full max-w-4xl min-h-screen flex flex-col pb-24">
-        
-        {/* Hide the Smatch logo */}
-        {/* <div className="flex flex-row item-center justify-center">
-          <SMATCHLogo />
-        </div> */}
+    <div className={classes.root}>
+      <Container className={classes.container}>
+        {/* Content */}
+        <Box flex={1}>
+          <Switch>
+            <Route exact path="/smatch" component={HomePage} />
+            <Route path="/smatch/matches" component={MatchesPage} />
+            <Route path="/smatch/forum" component={ForumPage} />
+            <Route path="/smatch/visualization" component={VisualizationPage} />
+            <Route
+              exact
+              path="/smatch/match/:path*"
+              render={(props) => <MatchPage {...props} />}
+            />
+            <Redirect to="/" />
+          </Switch>
+        </Box>
 
-        <div className="flex flex-row item-center justify-center">
-          <Explore></Explore>
+        {/* Bottom Navigation */}
+        <div className={classes.bottomNav}>
+          <NavigationItem icon={<HomeIcon />} to="/smatch" />
+          <NavigationItem icon={<ViewListIcon />} to="/smatch/matches" />
+          <NavigationItem icon={<MessageIcon />} to="/smatch/forum" />
+          <NavigationItem icon={<ChartBarIcon />} to="/smatch/visualization" />
         </div>
-
-        <div className="absolute bottom-0 inset-x-0 h-24 flex items-center justify-center">
-          <div className="bg-gray-900 px-4 py-2 rounded-xl flex items-center gap-3">
-            <NavigationItem icon={<CogIcon />} to="/smatch/settings" />
-            <NavigationItem icon={<HomeIcon />} to="/smatch/" />
-            <NavigationItem icon={<ViewListIcon />} to="/smatch/matches" />
-            <NavigationItem icon={<MessageIcon />} to="/smatch/forum" />
-            <NavigationItem icon={<ChartBarIcon />} to="/smatch/visualization" />
-          </div>
-        </div>
-      </div>
+      </Container>
     </div>
   );
-
 }
-
-export default Smatch;

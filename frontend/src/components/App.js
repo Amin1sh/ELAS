@@ -86,8 +86,8 @@ export default function App() {
           />
           <Route
             exact
-            path="/smatch"
-            render={() => <Smatch />}
+            path="/smatch/:path*"
+            render={(props) => <Smatch {...props} />}
           />
 
           {!isLoggedIn ? (
