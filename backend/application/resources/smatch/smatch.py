@@ -1,7 +1,11 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request, abort
 from orm_interface.base import Session
 from orm_interface.entities.user import User
 from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
+
+from orm_interface.entities.smatch.smatch_threads import Smatch_Thread
+from orm_interface.entities.smatch.smatch_replies import Smatch_Reply
+from orm_interface.entities.smatch.smatch_matched_terms import Smatch_MatchedTerm
 
 from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required
 
@@ -43,6 +47,7 @@ def smatch_home():
 def list_topics():
     # cur.execute('SELECT DISTINCT category FROM courselist ORDER BY category ASC')
     categories = session.query(Smatch_CourseList.category.distinct())\
+        .filter(Smatch_CourseList.category != '-') \
         .order_by(Smatch_CourseList.category).all()
 
     topics = list()
@@ -139,7 +144,7 @@ def new_reply(thread_id):
     body = request.json.get('body')
 
     # cur.execute('INSERT INTO replies (user_id, thread_id, body) VALUES (%s, %s, %s)', (user.id, thread_id, body))
-    new_item = smatch_Reply(user_id=user_id, thread_id=thread_id, body=body)
+    new_item = Smatch_Reply(user_id=user_id, thread_id=thread_id, body=body)
     session.add(new_item)
 
     try:
