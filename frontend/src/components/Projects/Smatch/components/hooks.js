@@ -57,3 +57,15 @@ export function useTopics() {
 
     return jsonData;
 }
+
+export function useSendSwipedTerms() {
+    const sendRequest = useAPIPost("swiped_terms");
+
+    return sendRequest;
+}
+
+export function useGenerateClusters() {
+    const sendRequest = useAPIPost("generate_clusters");
+
+    return sendRequest;
+}

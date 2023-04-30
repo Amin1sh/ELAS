@@ -6,7 +6,7 @@ from sklearn.feature_extraction import text
 from sklearn.cluster import KMeans
 from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
 
-from orm_interface.base import Session
+from orm_interface.base import Session, engine
 
 session = Session()
 
@@ -16,9 +16,9 @@ def get_all_courses(filters):
     # courses = pd.read_sql_query(query, con=engine, params=params)
 
     levels = tuple(filters["levels"])
-    courses = session.query(Smatch_CourseList).filter(Smatch_CourseList.category == filters["category"], Smatch_CourseList.price >= filters["price_min"],
+    courses = pd.read_sql(session.query(Smatch_CourseList).filter(Smatch_CourseList.category == filters["category"], Smatch_CourseList.price >= filters["price_min"],
         Smatch_CourseList.price <= filters["price_max"], Smatch_CourseList.duration >= filters["duration_min"], Smatch_CourseList.duration <= filters["duration_max"],
-        Smatch_CourseList.level.in_(levels)).all()
+        Smatch_CourseList.level.in_(levels)).statement, engine)
 
     return courses
 

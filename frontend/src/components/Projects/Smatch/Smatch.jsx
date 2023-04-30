@@ -8,7 +8,7 @@ import NavigationItem from './components/NavigationItem/NavigationItem';
 import HomePage from './components/HomePage/homepage';
 import ForumPage from './components/ForumPage/forumpage';
 import MatchesPage from './components/MatchesPage/matchespage';
-import MatchPage from './components/MatchPage/matchpage';
+import FindMatchPage from './components/FindMatchPage/findmatchpage';
 import VisualizationPage from './components/VisualizationPage/visualizationpage';
 
 const HomeIcon = () => <img src="icons/home.svg" />;
@@ -32,7 +32,7 @@ export default function Smatch() {
             <Route
               exact
               path="/smatch/match/:path*"
-              render={(props) => <MatchPage {...props} />}
+              render={(props) => <FindMatchPage {...props} />}
             />
             <Redirect to="/" />
           </Switch>
