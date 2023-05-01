@@ -54,6 +54,8 @@ def list_topics():
     for (name,) in categories:
         topics.append(name)
 
+    topics.sort()
+
     return jsonify(topics)
 
 

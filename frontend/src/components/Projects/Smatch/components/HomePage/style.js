@@ -5,11 +5,20 @@ export const style = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
   },
+  searchBox: {
+    margin: '10px 145px',
+    marginTop: '35px',
+    backgroundColor: "#fff",
+    borderRadius: '25px',
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '25px',
+    }
+  },
   grid: {
     display: "grid",
-    gridTemplateColumns: 'auto auto',
+    gridTemplateColumns: '1fr 1fr',
     [theme.breakpoints.up("lg")]: {
-      gridTemplateColumns: 'auto auto auto',
+      gridTemplateColumns: '1fr 1fr 1fr',
     },
     gap: '24px',
     padding: '16px',
