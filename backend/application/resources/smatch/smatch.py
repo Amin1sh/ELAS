@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request, abort
 from orm_interface.base import Session
 from orm_interface.entities.user import User
@@ -74,8 +76,10 @@ def smatch_threads():
     LEFT OUTER JOIN last_reply ON smatch_threads.id = last_reply.thread_id
     ORDER BY last_reply_on DESC
     ''').fetchall()
+
+    results_dict = [dict(row) for row in results]
     
-    return jsonify(results)
+    return jsonify(results_dict)
 
 
 
@@ -94,7 +98,24 @@ def show_replies(thread_id):
     #replies = cur.fetchall()
     replies = session.query(Smatch_Reply, User.email).join(User, Smatch_Reply.user_id == User.id).filter(Smatch_Reply.thread_id == int(thread_id)).order_by(Smatch_Reply.created_on).all()
 
-    thread['replies'] = replies
+    thread = {
+        'id': thread.Smatch_Thread.id,
+        'user_id': thread.Smatch_Thread.user_id,
+        'title': thread.Smatch_Thread.title,
+        'body': thread.Smatch_Thread.body,
+        'created_on': thread.Smatch_Thread.created_on,
+        'category': thread.Smatch_Thread.category,
+        'email': thread.email,
+        'replies': [
+            {
+                'id': reply.Smatch_Reply.id,
+                'user_id': reply.Smatch_Reply.user_id,
+                'body': reply.Smatch_Reply.body,
+                'created_on': reply.Smatch_Reply.created_on,
+                'email': reply.email,
+            } for reply in replies
+        ]
+    }
 
     return jsonify(thread)
 
@@ -120,7 +141,7 @@ def new_thread():
     body = request.json.get('body')
 
     # cur.execute('INSERT INTO threads (user_id, title, category, body) VALUES (%s, %s, %s, %s) RETURNING id', (user.id, title, category, body))
-    new_item = Smatch_Thread(title=title, category=category, body=body,user_id=user_id)
+    new_item = Smatch_Thread(title=title, created_on=datetime.now(), category=category, body=body, user_id=user_id)
     session.add(new_item)
 
     try:
@@ -146,7 +167,7 @@ def new_reply(thread_id):
     body = request.json.get('body')
 
     # cur.execute('INSERT INTO replies (user_id, thread_id, body) VALUES (%s, %s, %s)', (user.id, thread_id, body))
-    new_item = Smatch_Reply(user_id=user_id, thread_id=thread_id, body=body)
+    new_item = Smatch_Reply(user_id=user_id, created_on=datetime.now(), thread_id=thread_id, body=body)
     session.add(new_item)
 
     try:

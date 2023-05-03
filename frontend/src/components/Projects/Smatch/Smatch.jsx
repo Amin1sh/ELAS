@@ -11,6 +11,9 @@ import MatchesPage from './components/MatchesPage/matchespage';
 import FindMatchPage from './components/FindMatchPage/findmatchpage';
 import VisualizationPage from './components/VisualizationPage/visualizationpage';
 
+import NewThreadPage from './components/NewThreadPage/newthreadpage';
+import ThreadPage from './components/ThreadPage/threadpage';
+
 const HomeIcon = () => <img src="icons/home.svg" />;
 const MessageIcon = () => <img src="icons/message.svg" />;
 const ViewListIcon = () => <img src="icons/view-list.svg" />;
@@ -26,9 +29,13 @@ export default function Smatch() {
         <Box flex={1}>
           <Switch>
             <Route exact path="/smatch" component={HomePage} />
-            <Route path="/smatch/matches" component={MatchesPage} />
-            <Route path="/smatch/forum" component={ForumPage} />
-            <Route path="/smatch/visualization" component={VisualizationPage} />
+            <Route exact path="/smatch/matches" component={MatchesPage} />
+            <Route exact path="/smatch/forum" component={ForumPage} />
+            
+            <Route exact path="/smatch/forum/new" component={NewThreadPage} />
+            <Route exact path="/smatch/forum/:thread_id" component={ThreadPage} />
+            
+            <Route exact path="/smatch/visualization" component={VisualizationPage} />
             <Route
               exact
               path="/smatch/match/:path*"

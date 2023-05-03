@@ -69,3 +69,36 @@ export function useGenerateClusters() {
 
     return sendRequest;
 }
+
+export function useUserCount() {
+    const { response } = useAPIGet("user_count");
+    const { jsonData } = useAPIJson(response);
+
+    return jsonData;
+}
+
+export function useThreads() {
+    const { response } = useAPIGet("threads");
+    const { jsonData } = useAPIJson(response);
+
+    return jsonData;
+}
+
+export function useCreateThread() {
+    const sendRequest = useAPIPost("threads");
+
+    return sendRequest;
+}
+
+export function useThread(id) {
+    const { response, refresh } = useAPIGet(`threads/${id}`);
+    const { jsonData } = useAPIJson(response);
+
+    return { thread: jsonData, refresh };
+}
+  
+export function useCreateReply(thread_id) {
+    const sendRequest = useAPIPost(`threads/${thread_id}/replies`);
+
+    return sendRequest;
+}
