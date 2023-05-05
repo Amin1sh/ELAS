@@ -1,12 +1,51 @@
-import React from 'react';
+import React, { useContext } from "react"
+import { Link } from "react-router-dom";
 
-const MatchesPage = () => {
+import Title from "../Title/title";
+import { useGetHistory } from "../hooks";
+
+import style from "./matchespage-style";
+
+export default function MatchesPage() {
+  const matches_history = useGetHistory();
+
+  const classes = style();
+
   return (
-    <div>
-      <h1>Welcome to Matches Page</h1>
-      {/* Add your matches page content here */}
-    </div>
-  );
-};
+    <div className={classes.root}>
+      <Title>
+        {(matches_history && matches_history.length > 0) ? "It's a Match!" : "You have no matches yet!"}
+      </Title>
 
-export default MatchesPage;
+      {(matches_history && matches_history.length > 0) ? (
+        <div>
+          {matches_history.map((history) => (
+            <div className={classes.flexCol}>
+              <div className={classes.historyTitle}>
+                {history.topic} • {history.created_on}
+              </div>
+
+              <div className={classes.paper}>
+                {JSON.parse(history.result).map((item) => (
+                  <Link
+                    key={item.course_id}
+                    className={classes.link}
+                    to={`/smatch/course/${item.course_id}`}
+                  >
+                    <span>{item.subject}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={classes.noMatch}>
+          <Link className={classes.exploreBtn} to="/smatch/">
+            Explore topics and skills
+          </Link>
+        </div>
+      )}
+    </div>
+  )
+}

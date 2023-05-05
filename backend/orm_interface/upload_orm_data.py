@@ -13,6 +13,7 @@ from orm_interface.entities.smatch.smatch_replies import Smatch_Reply
 from orm_interface.entities.smatch.smatch_replies_old import Smatch_ReplyOld
 from orm_interface.entities.smatch.smatch_threads import Smatch_Thread
 from orm_interface.entities.smatch.smatch_threads_old import Smatch_ThreadOld
+from orm_interface.entities.smatch.smatch_history import Smatch_History
 
 import datetime
 import os

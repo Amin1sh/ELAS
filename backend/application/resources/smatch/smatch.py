@@ -8,10 +8,13 @@ from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
 from orm_interface.entities.smatch.smatch_threads import Smatch_Thread
 from orm_interface.entities.smatch.smatch_replies import Smatch_Reply
 from orm_interface.entities.smatch.smatch_matched_terms import Smatch_MatchedTerm
+from orm_interface.entities.smatch.smatch_history import Smatch_History
 
 from flask_jwt_extended import get_jwt_identity, JWTManager, jwt_required
 
 from .recommender import make_clusters
+
+import json
 
 smatch = Blueprint("smatch", __name__)
 session = Session()
@@ -259,7 +262,23 @@ def get_course(id):
     # cur.execute('SELECT * FROM courselist WHERE id = %s', (id,))
     course = session.query(Smatch_CourseList).filter(Smatch_CourseList.id == id).first()
 
-    return jsonify(course)
+    if course:
+        course = {
+            'id': course.id,
+            'name': course.name,
+            'provider': course.provider,
+            'level': course.level,
+            'instructor': course.instructor,
+            'description': course.description,
+            'duration': course.duration,
+            'price': course.price,
+            'link': course.link,
+            'category': course.category
+        }
+
+        return jsonify(course)
+    
+    abort(404)
 
 
 @smatch.route('/swiped_terms', methods = ['POST'])
@@ -267,16 +286,41 @@ def get_course(id):
 def swiped_terms():
     terms = request.json.get('terms')
 
-    for term in terms:
-        # cur.execute('INSERT INTO matched_terms (term, count) VALUES (%s, 1) ON CONFLICT (term) DO UPDATE SET count = matched_terms.count + 1', (term,))
-        sel_term_item = session.query(Smatch_MatchedTerm).filter(Smatch_MatchedTerm.term == term).first()
-        if sel_term_item:
-            sel_term_item.count = sel_term_item.count + 1
-        else:
-            new_item = Smatch_MatchedTerm(term=term, count=1)
-            session.add(new_item)
-            session.flush()
+    try:
+        for term in terms:
+            print('Term:', term)
+            # cur.execute('INSERT INTO matched_terms (term, count) VALUES (%s, 1) ON CONFLICT (term) DO UPDATE SET count = matched_terms.count + 1', (term,))
+            sel_term_item = session.query(Smatch_MatchedTerm).filter(Smatch_MatchedTerm.term == str(term)).first()
 
+            if sel_term_item:
+                sel_term_item.count += 1
+                session.commit()
+            else:
+                new_term = Smatch_MatchedTerm(term=term, count=1)
+                session.add(new_term)
+                session.commit()
+                session.refresh(new_term)
+
+        return jsonify({}), 201
+    
+    except:
+        abort(400)
+
+
+@smatch.route('/store_suggestion', methods = ['POST'])
+@jwt_required()
+def store_suggestion():
+    user_id = get_jwt_identity()['id']
+    
+    result = request.json
+    
+    topic = result['topic']
+    suggestions = json.dumps(result['suggestions'])
+
+    
+    new_item = Smatch_History(user_id=user_id, topic=topic, result=suggestions, created_on=datetime.now())
+    session.add(new_item)
+    
     try:
         session.commit()
         return jsonify({}), 201
@@ -287,3 +331,23 @@ def swiped_terms():
         session.close()
 
     abort(400)
+    
+    
+@smatch.route('/get_history')
+@jwt_required()
+def get_history():
+    user_id = get_jwt_identity()['id']
+    
+    histories = session.query(Smatch_History).filter(Smatch_History.user_id == user_id) \
+        .order_by(Smatch_History.created_on.desc()).all()
+        
+    
+    histories = [
+        {
+            'id': item.id,
+            'topic': item.topic,
+            'result': item.result,
+            'created_on': item.created_on,
+        } for item in histories]
+    
+    return jsonify(histories)

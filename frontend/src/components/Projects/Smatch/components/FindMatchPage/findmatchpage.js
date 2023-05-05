@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
-import MatchContext from "./MatchContext";
 import { selectTerms } from "./textProcessing";
 import Title from "../Title/title";
 import MatchPageStyle from "./findmatchpage-style";
 
-import { useGenerateClusters, useSendSwipedTerms } from "../hooks";
+import { useGenerateClusters, useSendSwipedTerms, useStoreSuggestion } from "../hooks";
 
 const CloseIcon = () => <img src="/icons/close-circle.svg" />;
 const CheckIcon = () => <img src="/icons/check-circle.svg" />;
@@ -106,6 +105,8 @@ function createClustersObject(clusters) {
 }
 
 export default function FindMatchPage() {
+  const sotreSuggestionRequest = useStoreSuggestion();
+
   const classes = MatchPageStyle();
 
   const pathname = window.location.pathname;
@@ -129,7 +130,6 @@ export default function FindMatchPage() {
   const [ swipedTerms, setSwipedTerms ] = useState([]);
   const sendSwipedTerms = useSendSwipedTerms();
 
-  const { pushMatch } = useContext(MatchContext);
   const history = useHistory();
 
   const nextGroup = async () => {
@@ -220,15 +220,23 @@ export default function FindMatchPage() {
                  .map(([ cluster, vote ] ) => cluster);
   }
 
-  const maybeAddQuestionGroup = () => {
+  const maybeAddQuestionGroup = async () => {
     let selectedClusters = Object.entries(terms);
     if (groups[groups.length - 1].title == "Recommendation") {
       const votes = countVotes(groupRanges["Recommendation"]);
       const ties = getTies(votes);
       if (ties.length == 1) {
-        pushMatch(clusters[ties[0]]);
-        sendSwipedTerms({ terms: swipedTerms });
-        history.push('/matches');
+        let requestData = {
+          topic: topic,
+          suggestions: clusters[ties[0]]
+        }
+
+        await sendSwipedTerms({ terms: swipedTerms });
+        
+        let result = await sotreSuggestionRequest(requestData);
+        if (result.status == 201) {
+          history.push('/smatch/matches');
+        }
         return;
       }
       selectedClusters = selectedClusters.filter(([ cluster ]) => ties.includes(cluster));

@@ -13,6 +13,7 @@ import VisualizationPage from './components/VisualizationPage/visualizationpage'
 
 import NewThreadPage from './components/NewThreadPage/newthreadpage';
 import ThreadPage from './components/ThreadPage/threadpage';
+import CoursePage from './components/CoursePage/coursepage';
 
 const HomeIcon = () => <img src="icons/home.svg" />;
 const MessageIcon = () => <img src="icons/message.svg" />;
@@ -32,6 +33,8 @@ export default function Smatch() {
             <Route exact path="/smatch/matches" component={MatchesPage} />
             <Route exact path="/smatch/forum" component={ForumPage} />
             
+            <Route exact path="/smatch/course/:id" component={CoursePage} />
+
             <Route exact path="/smatch/forum/new" component={NewThreadPage} />
             <Route exact path="/smatch/forum/:thread_id" component={ThreadPage} />
             

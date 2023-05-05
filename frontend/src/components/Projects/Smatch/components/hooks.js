@@ -102,3 +102,23 @@ export function useCreateReply(thread_id) {
 
     return sendRequest;
 }
+
+export function useStoreSuggestion() {
+    const sendRequest = useAPIPost("store_suggestion");
+
+    return sendRequest;
+}
+
+export function useGetHistory() {
+    const { response } = useAPIGet("get_history");
+    const { jsonData } = useAPIJson(response);
+
+    return jsonData;
+}
+
+export function useCourse(id) {
+    const { response, refresh } = useAPIGet(`course/${id}`);
+    const { jsonData } = useAPIJson(response);
+
+    return jsonData;
+}
