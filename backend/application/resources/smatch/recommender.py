@@ -30,7 +30,7 @@ def kmeans(courses):
     X = vectorizer.fit_transform(courses.description)
 
     # Chosen based on the elbow method
-    true_k = 8
+    true_k = int(len(courses) / 2) if len(courses) <= 8 else 8
     model = KMeans(n_clusters=true_k, init='k-means++', max_iter=200, n_init=10)
     model.fit(X)
     labels = model.labels_

@@ -189,20 +189,20 @@ def new_reply(thread_id):
 
 
 visualization_queries = {
-    "instructors": "SELECT count(*), instructor FROM smatch_courselist WHERE instructor IS NOT NULL GROUP BY instructor ORDER BY count DESC LIMIT 20",
-    "providers": "SELECT count(*), provider FROM smatch_courselist WHERE provider IS NOT NULL GROUP BY provider ORDER BY count DESC LIMIT 20",
-    "categories": "SELECT count(*), coalesce(category, 'Other') category FROM smatch_courselist GROUP BY category ORDER BY count DESC LIMIT 20",
-    "levels": "SELECT count(*), level FROM smatch_courselist GROUP BY level ORDER BY count DESC",
-    "duration_-": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL GROUP BY duration ORDER BY count DESC",
-    "duration_Beginner": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'Beginner' GROUP BY duration ORDER BY count DESC",
-    "duration_Intermediate": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'Intermediate' GROUP BY duration ORDER BY count DESC",
-    "duration_Advanced": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'Advanced' GROUP BY duration ORDER BY count DESC",
-    "duration_All": "SELECT count(*), duration FROM smatch_courselist WHERE duration IS NOT NULL AND level = 'All' GROUP BY duration ORDER BY count DESC",
-    "price_-": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL GROUP BY price ORDER BY count DESC",
-    "price_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'Beginner' GROUP BY price ORDER BY count DESC",
-    "price_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'Intermediate' GROUP BY price ORDER BY count DESC",
-    "price_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'Advanced' GROUP BY price ORDER BY count DESC",
-    "price_All": "SELECT count(*), price FROM smatch_courselist WHERE price IS NOT NULL AND level = 'All' GROUP BY price ORDER BY count DESC",
+    "instructors": "SELECT count(*), instructor FROM smatch_courselist WHERE instructor != '-' and category != '-' and instructor IS NOT NULL GROUP BY instructor ORDER BY count DESC",
+    "providers": "SELECT count(*), provider FROM smatch_courselist WHERE instructor != '-' and category != '-' and  provider IS NOT NULL GROUP BY provider ORDER BY count DESC",
+    "categories": "SELECT count(*), coalesce(category, 'Other') category FROM smatch_courselist WHERE instructor != '-' and category != '-' GROUP BY category ORDER BY count DESC",
+    "levels": "SELECT count(*), level FROM smatch_courselist  WHERE instructor != '-' and category != '-'GROUP BY level ORDER BY count DESC",
+    "duration_-": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL GROUP BY duration ORDER BY count DESC",
+    "duration_Beginner": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Beginner' GROUP BY duration ORDER BY count DESC",
+    "duration_Intermediate": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Intermediate' GROUP BY duration ORDER BY count DESC",
+    "duration_Advanced": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Advanced' GROUP BY duration ORDER BY count DESC",
+    "duration_All": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'All' GROUP BY duration ORDER BY count DESC",
+    "price_-": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL GROUP BY price ORDER BY count DESC",
+    "price_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Beginner' GROUP BY price ORDER BY count DESC",
+    "price_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Intermediate' GROUP BY price ORDER BY count DESC",
+    "price_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Advanced' GROUP BY price ORDER BY count DESC",
+    "price_All": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'All' GROUP BY price ORDER BY count DESC",
     "terms": "SELECT * FROM smatch_matched_terms ORDER BY count DESC LIMIT 50"
 };
 
@@ -212,6 +212,7 @@ def visualization(name):
     # cur.execute(visualization_queries[name])
     # result = cur.fetchall()
     result = session.execute(visualization_queries[name]).fetchall()
+    result = [dict(item) for item in result]
     return jsonify(result)
 
 

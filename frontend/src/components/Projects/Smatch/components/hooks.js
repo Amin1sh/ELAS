@@ -122,3 +122,10 @@ export function useCourse(id) {
 
     return jsonData;
 }
+
+export function useVisualization(name) {
+    const { response } = useAPIGet(`visualization/${name}`);
+    const { jsonData } = useAPIJson(response);
+
+    return jsonData;
+}

@@ -1,7 +1,12 @@
 export function selectTerms(clusters) {
     const terms = createTermsObject(clusters);
+    console.log(terms)
+    
     const duplicateTerms = getDuplicateTerms(terms);
     const deduplicatedTerms = removeTerms(terms, duplicateTerms);
+
+    console.log(deduplicatedTerms)
+
     return deduplicatedTerms;
   }
   

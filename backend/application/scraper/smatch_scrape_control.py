@@ -92,6 +92,12 @@ def labeling_process(data):
             except:
                 pass
 
+        try:
+            if data.loc[index,"category"] is None:
+                data.loc[index,"category"] = '-'
+        except:
+            pass
+
     data = data.loc[:, ~data.columns.str.contains('clean_name')]
     return data
 
@@ -112,13 +118,15 @@ def edx_get_page(url):
         level = level_1.partition(": ")[2]
     except:
         level = "-"
+    
+    level = 'Beginner' if level == 'Introductory' else level
         
     
     try:
         subject = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[2]").text
         subject = subject.partition(": ")[2]
     except:
-        subject = "-"
+        subject = None
     
     
     try:
@@ -185,7 +193,7 @@ def edx_run(config, store_in_database=True):
     data = pd.DataFrame(columns=headers)
 
     print('Start edx scraping...')
-    browser.get(f'https://www.edx.org/search?tab=course')
+    browser.get(f'https://www.edx.org/search?tab=course&language=English')
     time.sleep(5)
     browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
     time.sleep(3)
@@ -357,6 +365,8 @@ def coursera_run(config, store_in_database = True):
                     except:
                         level = '-'
                 
+                level = 'Advanced' if level == 'Mixed' else level
+                
                 new_item = {'name': title, 'level': level, 'link': link}
                 list_courses.append(new_item)
             except:
@@ -391,7 +401,7 @@ def coursera_run(config, store_in_database = True):
             'duration': 0,
             'price': 0,
             'link': course_item['link'],
-            'category': '-'
+            'category': None
         }
         
         retries = 3
