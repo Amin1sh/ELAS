@@ -1,9 +1,9 @@
 courseInsightsTargetFile: bin/studyprograms.js
 courseScraper: uni-due-course-catalog-scraper
-courseraStatusMessage: 2022-05-10 22:15
+courseraStatusMessage: 2023-05-27 03:13
 e3RatingsFile: bin/avg_ratings.json
 e3TargetFile: bin/e3_courses.json
-edxStatusMessage: 2022-05-10 22:15
+edxStatusMessage: 2023-05-24 11:21
 lsf_post_processing: scrapers/lsf_scraper/lsf_scraper/post_processing
 lsf_scraper_directory: scrapers/lsf_scraper
 merge_data_post_processing_directory: scrapers

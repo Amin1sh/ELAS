@@ -24,9 +24,9 @@ const defaultGroups = [
   {
     title: "Duration",
     questions: [
-      { value: "short", text: "Show me short courses (<5 weeks)" },
-      { value: "medium", text: "Show me intermediate length courses (5-15 weeks)" },
-      { value: "long", text: "Show me long courses (>15 weeks)" },
+      { value: "short", text: "Show me short courses<br/>(<15 hours)" },
+      { value: "medium", text: "Show me intermediate length courses (16-50 hours)" },
+      { value: "long", text: "Show me long courses<br/>(>50 hours)" },
     ],
     skippable: true,
   },
@@ -54,15 +54,15 @@ function createFilters(topic, groupRanges) {
     switch (duration) {
       case "short":
         filters.duration_min = Math.min(filters.duration_min, 0);
-        filters.duration_max = Math.max(filters.duration_max, 4);
-        break;
-      case "medium":
-        filters.duration_min = Math.min(filters.duration_min, 5);
         filters.duration_max = Math.max(filters.duration_max, 15);
         break;
-      case "long":
+      case "medium":
         filters.duration_min = Math.min(filters.duration_min, 16);
-        filters.duration_max = Math.max(filters.duration_max, 1000);
+        filters.duration_max = Math.max(filters.duration_max, 50);
+        break;
+      case "long":
+        filters.duration_min = Math.min(filters.duration_min, 51);
+        filters.duration_max = Math.max(filters.duration_max, 10000);
     }
   }
 
@@ -166,7 +166,7 @@ export default function FindMatchPage() {
 
   const swipeRight = () => {
     setSwipeState(1);
-    if (groups[currentGroup].title == "Recommendation") {
+    if (groups[currentGroup].title == "Your Intrest") {
       setSwipedTerms([ ...swipedTerms, groups[currentGroup].questions[currentQuestion].text ]);
     }
     appendAnswers(groups[currentGroup].questions[currentQuestion].value);
@@ -222,13 +222,19 @@ export default function FindMatchPage() {
 
   const maybeAddQuestionGroup = async () => {
     let selectedClusters = Object.entries(terms);
-    if (groups[groups.length - 1].title == "Recommendation") {
-      const votes = countVotes(groupRanges["Recommendation"]);
+    if (groups[groups.length - 1].title == "Your Intrest") {
+      const votes = countVotes(groupRanges["Your Intrest"]);
       const ties = getTies(votes);
-      if (ties.length == 1) {
+      
+      if (ties.length >= 1) {
+        var sug_data = []
+        for (var i = 1; i < ties.length; i++) {
+          sug_data = [...sug_data, ...clusters[ties[i]]]
+        }
+
         let requestData = {
           topic: topic,
-          suggestions: clusters[ties[0]]
+          suggestions: sug_data
         }
 
         await sendSwipedTerms({ terms: swipedTerms });
@@ -255,7 +261,7 @@ export default function FindMatchPage() {
     }
 
     let newGroup = {
-      title: "Recommendation",
+      title: "Your Intrest",
       questions, 
       skippable: false,
     };
@@ -290,7 +296,7 @@ export default function FindMatchPage() {
               <button className={`${classes.button}`} onClick={() => swipeLeft()}>
                 <CloseIcon />
               </button>
-              <span className={classes.questionText}>{groups[lastGroup].questions[lastQuestion].text}</span>
+              <span className={classes.questionText} dangerouslySetInnerHTML={{ __html: groups[lastGroup].questions[lastQuestion].text }}></span>
               <button className={classes.button} onClick={() => swipeRight()}>
                 <CheckIcon />
               </button>

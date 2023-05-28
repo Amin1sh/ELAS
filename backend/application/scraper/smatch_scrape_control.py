@@ -1,31 +1,9 @@
+import json
 import pandas as pd
-import requests, json
-
 import os
 import yaml
 from datetime import datetime
-
 import pandas as pd
-import numpy as np
-import json
-import nltk
-import re
-import csv
-import matplotlib.pyplot as plt 
-import seaborn as sns
-from tqdm import tqdm
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.naive_bayes import MultinomialNB
-
-import json, requests, bs4
-import pandas as pd
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -33,74 +11,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 
-import random
-
 # for add in database
 from orm_interface.base import Session
 from orm_interface.entities.smatch.smatch_courselist import Smatch_CourseList
 session = Session()
-
-
-def clean_text(text):
-    text = str(text)
-    text = text.lower()
-    text = re.sub(r"what's", "what is ", text)
-    text = re.sub(r"\'s", " ", text)
-    text = re.sub(r"\'ve", " have ", text)
-    text = re.sub(r"can't", "can not ", text)
-    text = re.sub(r"n't", " not ", text)
-    text = re.sub(r"i'm", "i am ", text)
-    text = re.sub(r"\'re", " are ", text)
-    text = re.sub(r"\'d", " would ", text)
-    text = re.sub(r"\'ll", " will ", text)
-    text = re.sub(r"\'scuse", " excuse ", text)
-    text = re.sub('\W', ' ', text)
-    text = re.sub('\s+', ' ', text)
-    text = text.strip(' ')
-    return text
-
-def labeling_process(data):
-    unlabeled = data[data.category.isnull()]
-    labeled = data[data.category.notnull()]
-
-    available_cat = list(dict.fromkeys(labeled["category"]))
-    print('Available Categories:', available_cat)
-
-    labeled['description'] = labeled['description'].map(lambda com : clean_text(com))
-    unlabeled['description'] = unlabeled['description'].map(lambda com : clean_text(com))
-
-    X_train =labeled.name
-    X_test = unlabeled.name
-    y_train = labeled.category
-
-    count_vect = CountVectorizer()
-    X_train_counts = count_vect.fit_transform(X_train)
-    tfidf_transformer = TfidfTransformer()
-    X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
-    clf = MultinomialNB().fit(X_train_tfidf, y_train)
-
-    clf.predict((count_vect.transform(["This course begins with a look at the determinants of value. We will cover two main approaches to valuing businesses as going concerns, discounting cash flows and valuation ratios, including the inputs needed to perform the calculations and how each deal with risk."])))[0]
-
-    data['clean_name'] = data['name'].map(lambda com : clean_text(com))
-    data['category'] = data['category'].fillna("a")
-    print(data)
-    for index,row in data.iterrows():
-        if row["category"] == "a":
-            try:
-                data.loc[index,"category"] = clf.predict((count_vect.transform([row["clean_name"]])))[0]
-                print(data.loc[index,"category"])
-            except:
-                pass
-
-        try:
-            if data.loc[index,"category"] is None:
-                data.loc[index,"category"] = '-'
-        except:
-            pass
-
-    data = data.loc[:, ~data.columns.str.contains('clean_name')]
-    return data
-
 
 ### --------------- EDX section -------------------
 def edx_get_page(url):
@@ -111,13 +25,16 @@ def edx_get_page(url):
     
     browser.get(url)
     name = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[1]/div[1]/div[5]/div[1]/h1").text
-    provider = "edx"
+    provider = "edX"
     
     try:
         level_1 = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[3]").text
         level = level_1.partition(": ")[2]
     except:
-        level = "-"
+        try:
+            level_1 = browser.find_element(by=By.XPATH, value="//ul[contains(@class, 'mb-0 pl-3 ml-1')][1]/li[3]").text
+        except:
+            level = "-"
     
     level = 'Beginner' if level == 'Introductory' else level
         
@@ -126,19 +43,29 @@ def edx_get_page(url):
         subject = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[2]").text
         subject = subject.partition(": ")[2]
     except:
-        subject = None
+        try:
+            subject = browser.find_element(by=By.XPATH, value="//ul[contains(@class, 'mb-0 pl-3 ml-1')][1]/li[2]").text
+            subject = subject.partition(": ")[2]
+        except:
+            subject = '-'
     
     
     try:
         instructor = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[2]/div[1]/div[1]/div[1]/ul/li[1]/a").text
     except:
-        instructor = "-"
+        try:
+            level_1 = browser.find_element(by=By.XPATH, value="//ul[contains(@class, 'mb-0 pl-3 ml-1')][1]/li[1]/a").text
+        except:
+            instructor = "-"
     
     
     try:
         description = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'course-about') and contains(@class, 'desktop')]/div[4]/div[1]/div[1]/div[2]/div[1]").text
     except:
-        description = "-"
+        try:
+            description = browser.find_element(by=By.XPATH, value="//div[contains(@class, 'preview-expand-component')]/div[2]/div[1]/p[1]/span[1]").text
+        except:
+            description = "-"
     
     
     try:
@@ -256,17 +183,9 @@ def edx_run(config, store_in_database=True):
                 print(f'Error in scraping url[{page_url}]:', str(e))
                 pass
 
-    
-
-
-    result = labeling_process(data)
-
-    # result
-    # print('result: ', result)
-
     if store_in_database == True:
         # add data to database (without testing)
-        for index, row in result.iterrows():
+        for index, row in data.iterrows():
             check_exists = session.query(Smatch_CourseList).filter(Smatch_CourseList.link == row['link']).first()
             
             if check_exists is None:
@@ -295,26 +214,48 @@ def edx_run(config, store_in_database=True):
         
         session.close()
     else:
-        result.to_csv("edx_data.csv")
+        data.to_csv("edx_data.csv")
         
     config["edxStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
         file.write(yaml.dump(config))
 ### ------------- End EDX section -----------------
 
+
+
 ### --------------- Coursera section -------------------
 def coursera_run(config, store_in_database = True):
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=2560,1440")
+    
+    # Set proxy with SOCKS5
+    # chrome_options.add_argument("--proxy-server=socks5://localhost:9999")
+    
     browser = webdriver.Chrome(options=chrome_options)
 
     print('start coursera scraping')
 
+
+    ### new edition
+    browser.get('https://www.coursera.org/?authMode=login')
+    username_input = browser.find_element(by=By.ID, value='email')
+    username_input.send_keys('volid86475@aicogz.com')
+
+    password_input = browser.find_element(by=By.ID, value='password')
+    password_input.send_keys('Abc@123456')
+
+    login_button = browser.find_element(by=By.XPATH, value="//button[@type='submit']")
+    login_button.click()
+
+    # wait for the manual completion of reCAPTCHA
+    time.sleep(30)
+    ### end new edition
+
     # set custom filter
     browser.get('https://www.coursera.org/courses')
-    time.sleep(20)
+    time.sleep(10)
     try:
         btn_accept = browser.find_element(by=By.XPATH, value="//*[@id='onetrust-accept-btn-handler']")
         btn_accept.click()
@@ -345,7 +286,16 @@ def coursera_run(config, store_in_database = True):
         time.sleep(3)
         for i in range(1, 13): # 1..12
             try:
-                link = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/ul/li[{str(i)}]/div/div/a").get_attribute('href')
+                try:
+                    link = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/ul/li[{str(i)}]/div/div/a").get_attribute('href')
+                except:
+                    try:
+                        link = browser.find_element(by=By.XPATH, value=f"(//div[contains(@class, 'css-1j8ushu')])[{str(i)}]//a").get_attribute('href')
+                    except:
+                        try:
+                            link = browser.find_element(by=By.XPATH, value=f"((//ul[contains(@class, 'ais-InfiniteHits-list')])[1]/li[{str(i)}])//a").get_attribute('href')
+                        except:
+                            print("Can't find course link")
                 
                 try:
                     title = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/ul/li[{str(i)}]/div/div/a/div/div[2]/div/h2").text
@@ -353,7 +303,13 @@ def coursera_run(config, store_in_database = True):
                     try:
                         title = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/ul/li[{str(i)}]/div/div/a/div/div[3]/div/h2").text
                     except:
-                        title = '-'
+                        try:
+                            title = browser.find_element(by=By.XPATH, value=f"(//h2[contains(@class, 'css-bku0rr')])[{str(i)}]").text
+                        except:
+                            try:
+                                title = browser.find_element(by=By.XPATH, value=f"(//div[contains(@class, 'css-1j8ushu')])[{str(i)}]//h2").text
+                            except:
+                                title = '-'
                 
                 try:
                     level = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/ul/li[{str(i)}]/div/div/a/div/div[2]/div[2]/p").text
@@ -363,7 +319,11 @@ def coursera_run(config, store_in_database = True):
                         level = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/ul/li[{str(i)}]/div/div/a/div/div[3]/div[2]/p").text
                         level = level.split(' ')[0]
                     except:
-                        level = '-'
+                        try:
+                            level = browser.find_element(by=By.XPATH, value=f"(((//div[contains(@class, 'css-1j8ushu')])[{str(i)}]//p[contains(@class, 'css-14d8ngk')])[last()]").text
+                            level = level.split(' ')[0]
+                        except:
+                            level = '-'
                 
                 level = 'Advanced' if level == 'Mixed' else level
                 
@@ -371,7 +331,8 @@ def coursera_run(config, store_in_database = True):
                 list_courses.append(new_item)
             except:
                 pass
-        
+            
+            
         try:
             next_page_elm = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/div[1]/div/button[7]")
             is_next_page_elm_disabled = next_page_elm.get_attribute('disabled') is not None # True, False
@@ -383,12 +344,13 @@ def coursera_run(config, store_in_database = True):
                 time.sleep(3)
         except:
             break
-
-
-    browser.close()
-
-    # list_courses
-    # courses page scrape
+        
+        
+    # json_string = json.dumps(list_courses)
+    # with open("output_list_courses.json", "w") as file:
+    #     file.write(json_string)
+    
+    
     list_courses_info = []
 
     for course_item in list_courses:
@@ -401,25 +363,41 @@ def coursera_run(config, store_in_database = True):
             'duration': 0,
             'price': 0,
             'link': course_item['link'],
-            'category': None
+            'category': '-'
         }
         
         retries = 3
         while retries > 0:
             try:
-                browser = webdriver.Chrome(options=chrome_options)
                 course_page = browser.get(course_item['link'])
                 time.sleep(3)
                 
                 try:
-                    course_info['instructor'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[1]/div[1]/div[1]/div/div/div/div[4]/div/div/div/a/div/div/span").text.strip()
+                    course_info['instructor'] = browser.find_element(by=By.XPATH, value=f"(((//div[contains(@class, 'rc-BannerInstructorInfo')])[1]//a)[1]//span)[1]").text.strip()
                 except:
-                    pass
+                    try:
+                        course_info['instructor'] = browser.find_element(by=By.XPATH, value=f"((//a[@data-track-component='nav_item_instructors'])[1]//text())[1]").text.strip()
+                    except:
+                        try:
+                            course_info['instructor'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[1]/div[1]/div[1]/div/div/div/div[4]/div/div/div/a/div/div/span").text.strip()
+                        except:
+                            try:
+                                course_info['instructor'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[1]/div[1]/div[1]/div/div/div/div[4]/div/div/div/a/div/div/span").text.strip()
+                            except:
+                                try:
+                                    course_info['instructor'] = browser.find_element(by=By.XPATH, value=f"//div[contains(@class, 'instructor-wrapper')][1]//h3[contains(@class, 'instructor-name')]/text()").text.strip()
+                                except:
+                                    pass
                 
                 try:
-                    course_info['description'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[2]/div/div/div/div/div[2]/div/div/div[1]/p[1]").text.strip()
+                    course_info['description'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[2]/div/div/div/div/div[2]/div/div/div[1]").text.strip()
                 except:
-                    pass
+                    try:
+                        course_info['description'] = browser.find_element(by=By.XPATH, value=f"(//div[contains(@class, 'AboutCourse')][1]//div[contains(@class, 'description')])[1]").text.strip()
+                    except:
+                        pass
+                    
+                course_info['description'] = course_info['description'].replace('\'', ' ').replace('"', ' ').replace('\n', ' ').replace('SHOW ALL COURSE OUTLINE', '').replace('SHOW ALL', '').strip()
                 
                 try:
                     course_info['duration'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[2]/div/div/div/div[2]/div/div/div[5]/div[2]/div[1]/span[1]").text.strip()
@@ -431,56 +409,119 @@ def coursera_run(config, store_in_database = True):
                         course_info['duration'] = course_info['duration'].split(' ')[1].strip()
                         course_info['duration'] = int(course_info['duration'])
                     except:
-                        pass
+                        try:
+                            course_info['duration'] = browser.find_element(by=By.XPATH, value=f"(//span[contains(text(), 'Approx') and contains(text(), 'hour')])[2]").text.strip()
+                            course_info['duration'] = course_info['duration'].split(' ')[1].strip()
+                            course_info['duration'] = int(course_info['duration'])
+                        except:
+                            pass
                 
                 try:
                     course_info['category'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/a").text.strip()
                 except:
-                    pass
-                
-                try:
-                    course_info['price'] = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[1]/div/div/div/div/div/div[5]/div/div/div/div/div/div/form/button/span[1]/div[1]/span[1]").text.strip().lower()
-                    if 'free' in course_info['price']:
-                        course_info['price'] = 0
-                    else:
-                        print('Price:', course_info['price'])
-                        # todo: get price
-                        course_info['price'] = 0
-                except Exception as e:
                     try:
-                        course_info['price'] = browser.find_element(by=By.XPATH, value=f"//main/section[2]/div[1]/div[1]/div[1]/div[1]/section[1]/div[3]/div[1]/div[1]/form[1]/button[1]/span[1]/div[1]/span[1]").text.strip().lower()
-                        if 'free' in course_info['price']:
-                            course_info['price'] = 0
-                        else:
-                            print('Price:', course_info['price'])
-                            # todo: get price
-                            course_info['price'] = 0
+                        course_info['category'] = browser.find_element(by=By.XPATH, value=f"//div[contains(@role, 'navigation')]/div[2]/a").text.strip()
                     except:
-                        print('Err3:', course_info['link'], str(e))
-                        pass
-                
-                browser.close()
+                        try:
+                            course_info['category'] = browser.find_element(by=By.XPATH, value=f"(//div[@aria-label='breadcrumbs']//a)[2]").text.strip()
+                        except:
+                            pass
+
+                course_info['price'] = 0
+                bln_enroll_click = False
+                try:
+                    try:
+                        btn_enroll = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[1]/div/div/div/div/div/div[5]/div/div/div/div/div/div/form/button[1]")
+                        btn_enroll.click()
+                        bln_enroll_click = True
+                        time.sleep(5)
+                    except:
+                        try:
+                            btn_enroll = browser.find_element(by=By.XPATH, value=f"//main/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[5]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/button[1]")
+                            btn_enroll.click()
+                            bln_enroll_click = True
+                            time.sleep(5)
+                        except:
+                            try:
+                                btn_enroll = browser.find_element(by=By.XPATH, value=f"//main/section[2]/div[1]/div[1]/div[1]/div[1]/section[1]/div[3]/div[1]/div[1]/form[1]/button[1]")
+                                btn_enroll.click()
+                                bln_enroll_click = True
+                                time.sleep(5)
+                            except:
+                                try:
+                                    btn_enroll = browser.find_element(by=By.XPATH, value=f"(//button[.//span[contains(text(), 'Enroll') and contains(@data-test, 'enroll-button-label')]])[1]")
+                                    btn_enroll.click()
+                                    bln_enroll_click = True
+                                    time.sleep(5)
+                                except:
+                                    pass  
+                    
+                    if bln_enroll_click:
+                        try:
+                            price = browser.find_element(by=By.XPATH, value=f"//div[contains(@class, 'bt3-radio') and contains(@class, 'choice-radio-container')][1]/label/div[2]/div/h4/span[1]/span[3]/span[1]/span").text.strip().lower()
+                            price = str(price).replace('€', '').replace('$', '').replace(',', '').strip()
+                            course_info['price'] = int(price)
+                        except:
+                            try:
+                                price = browser.find_element(by=By.XPATH, value=f"//span[contains(@class, 'rc-ReactPriceDisplay')]/span[1]").text.strip().lower()
+                                price = str(price).replace('€', '').replace('$', '').replace(',', '').strip()
+                                course_info['price'] = int(price)
+                            except:
+                                try:
+                                    btn_next = browser.find_element(by=By.XPATH, value=f"//button[contains(@class, 'primary') and contains(text(), 'Next')][1]")
+                                    btn_next.click()
+                                    time.sleep(5)
+                                    
+                                    price = browser.find_element(by=By.XPATH, value=f"//span[contains(@class, 'rc-ReactPriceDisplay')]/span[1]").text.strip().lower()
+                                    price = str(price).replace('€', '').replace('$', '').replace(',', '').strip()
+                                    course_info['price'] = int(price)
+                                except:
+                                    pass
+                    
+                except Exception as e:
+                    # print('Err3:', course_info['link'], str(e))
+                    pass
 
                 list_courses_info.append(course_info)
+                
+                print(course_info)
 
                 print(f'Scrape course ({course_info["name"]}) completed')
                 break
             except Exception as e:
                 print('It Failed, course:', course_info["link"], str(e))
+                
+                ### start new edition
+                browser.close()
+                
+                browser.get('https://www.coursera.org/?authMode=login')
+                username_input = browser.find_element(by=By.ID, value='email')
+                username_input.send_keys('volid86475@aicogz.com')
+
+                password_input = browser.find_element(by=By.ID, value='password')
+                password_input.send_keys('Abc@123456')
+
+                login_button = browser.find_element(by=By.XPATH, value="//button[@type='submit']")
+                login_button.click()
+                
+                # wait for the manual completion of reCAPTCHA
+                time.sleep(30)
+                ### end new edition
+
+                
                 retries -= 1
 
 
+    browser.close()
+    
     headers = ["name", "provider", "level", "instructor", "description", "duration", "price", "link", "category"]
     data = pd.DataFrame(list_courses_info, columns=headers)
-
-    result = labeling_process(data)    
-
-    # result
-    # print('result: ', result)
+    
+    # data.to_csv("last_scrape_data.csv")
 
     if store_in_database == True:
         # add data to database (without testing)
-        for index, row in result.iterrows():
+        for index, row in data.iterrows():
             check_exists = session.query(Smatch_CourseList).filter(Smatch_CourseList.link == row['link']).first()
             
             if check_exists is None:
@@ -502,19 +543,21 @@ def coursera_run(config, store_in_database = True):
             
         try:
             session.commit()
-            print('Scrap is over.')
+            print('Ok!')
         except Exception as e :
             print('error: ', str(e))
             session.rollback()
         
         session.close()
     else:
-        result.to_csv("coursera_data.csv")
+        data.to_csv("coursera_data.csv")
 
     config["courseraStatusMessage"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "w") as file:
         file.write(yaml.dump(config))
 ### ------------- End Coursera section -----------------
+
+
 
 
 # run

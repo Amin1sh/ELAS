@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { scaleOrdinal } from 'd3-scale';
 import { schemeSpectral, schemeCategory10 } from 'd3-scale-chromatic';
 import { BarChart, XAxis, YAxis, Tooltip, Legend, Bar, PieChart, Pie, Label, LabelList, ResponsiveContainer, Cell } from "recharts";
@@ -82,12 +82,26 @@ function TabVisualization({ category, classes }) {
   }
 }
 
+const CustomTooltip = ({ active, payload, label, backgroundColor, fontColor }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ backgroundColor, color: fontColor, padding: '10px', border: '1px solid #fff', borderRadius: '5px', fontWeight: 'bold' }}>
+        <p>{`${payload[0].name}: ${payload[0].value}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 function InstructorsVisualization({ classes }) {
   const [dataCount, setDataCount] = useState(10);
   const data = useVisualization("instructors");
 
+  const instructorsDiv = useRef(null);
+
   return (
-    <div className={classes['flex-center-items']}>
+    <div className={classes['flex-center-items']} ref={instructorsDiv}>
       <div className={classes.boxChart}>
         <label for="dataCount" className={classes.tabBoxLblCount}>Data count</label>
         <select id="dataCount" name="dataCount" value={dataCount} onChange={(e) => setDataCount(e.target.value)} className={classes.selectCount}>
@@ -100,17 +114,26 @@ function InstructorsVisualization({ classes }) {
 
       { data ?
         <BarChart
-          width={600}
-          height={800}
+          width={instructorsDiv.current.offsetWidth}
+          height={601}
+          layout="vertical"
           data={dataCount == -1 ? data : data?.slice(0, dataCount)}
-          margin={{ top: 5, right: 5, left: 5, bottom: 200 }}
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
         >
           
-          <XAxis dataKey="instructor" interval={0} tick={{ angle: 90, fill: '#E5E7EB' }} tickMargin={100} />
-          <YAxis dataKey={(v)=>parseInt(v.count)} tick={{ fill: '#E5E7EB' }} />
-          <Tooltip />
+          <XAxis type="number" allowDecimals={false} />
+          <YAxis type="category" dataKey="instructor" width={200} tick={{ fill: '#E5E7EB' }} />
+          
+          <Tooltip
+            content={
+              <CustomTooltip
+                backgroundColor="#4B5563"
+                fontColor="#F59E0B"
+              />
+            }
+          />
           <Legend verticalAlign="top" height={36} />
-          <Bar dataKey="count" fill="#0000" name="# courses by instructor">
+          <Bar dataKey="count" fill="#F59E0B" label={{ fill: '#000' }} name="# courses by instructor">
             {
               data.map((entry, index) => (
                 <Cell
@@ -131,21 +154,30 @@ function InstructorsVisualization({ classes }) {
 function ProvidersVisualization({ classes }) {
   const data = useVisualization("providers");
 
+  const providersDiv = useRef(null);
+
   return (
-    <div className={classes['flex-center-items']}>
+    <div className={classes['flex-center-items']} ref={providersDiv}>
       { data ?
         <BarChart
-          width={600}
-          height={600}
+          width={(providersDiv.current.offsetWidth <= 390 ? providersDiv.current.offsetWidth : (providersDiv.current.offsetWidth * 0.6))}
+          height={680}
           data={data}
           margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
         >
           
           <XAxis dataKey="provider" tick={{ fill: '#E5E7EB' }} />
-          <YAxis dataKey={(v)=>parseInt(v.count)} tick={{ fill: '#E5E7EB' }} />
-          <Tooltip />
+          <YAxis dataKey={(v)=>parseInt(v.count)} domain={[0, 1200]} tick={{ fill: '#E5E7EB' }} />
+          <Tooltip
+            content={
+              <CustomTooltip
+                backgroundColor="#4B5563"
+                fontColor="#F59E0B"
+              />
+            }
+          />
           <Legend verticalAlign="top" height={36} />
-          <Bar dataKey="count" fill="#F59E0B" label={{ fill: '#E5E7EB' }} name="# courses by provider">
+          <Bar dataKey="count" fill="#F59E0B" label={{ fill: '#000' }} name="# courses by provider">
             {
               data.map((entry, index) => (
                 <Cell
@@ -166,21 +198,32 @@ function ProvidersVisualization({ classes }) {
 function CategoriesVisualization({ classes }) {
   const data = useVisualization("categories");
 
+  const categoriesDiv = useRef(null);
+
   return (
-    <div className={classes['flex-center-items']}>
+    <div className={classes['flex-center-items']} ref={categoriesDiv}>
       { data ?
         <BarChart
-          width={600}
-          height={800}
-          data={data}
-          margin={{ top: 5, right: 5, left: 5, bottom: 200 }}
+          width={categoriesDiv.current.offsetWidth}
+          height={680}
+          data={data.slice(0, 23)}
+          layout="vertical"
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
         >
           
-          <XAxis dataKey="category" interval={0} tick={{ angle: 90, fill: '#E5E7EB' }} tickMargin={100} />
-          <YAxis dataKey={(v)=>parseInt(v.count)} tick={{ fill: '#E5E7EB' }} />
-          <Tooltip />
+          <XAxis type="number" allowDecimals={false} />
+          <YAxis type="category" dataKey='category' width={270} tick={{ fill: '#E5E7EB' }} />
+
+          <Tooltip
+            content={
+              <CustomTooltip
+                backgroundColor="#4B5563"
+                fontColor="#F59E0B"
+              />
+            }
+          />
           <Legend verticalAlign="top" height={36} />
-          <Bar dataKey="count" fill="#F59E0B" name="# courses by category">
+          <Bar dataKey="count" fill="#F59E0B" label={{fill:'#000'}} name="# courses by category">
             {
               data.map((entry, index) => (
                 <Cell
@@ -204,6 +247,13 @@ function DurationVisualization({ classes }) {
   const levelData = useVisualization("levels");
   const data = useVisualization(`duration_${selectedLevel}`);
 
+  const durationDiv = useRef(null);
+
+  const [activeIndex, setActiveIndex] = useState(null);
+  const handleSliceHover = (data, index) => {
+    setActiveIndex(index);
+  };
+
   useEffect(() => {
     if (data) {
       const top = data.slice(0, 3).map((v) => {
@@ -219,9 +269,9 @@ function DurationVisualization({ classes }) {
   }, [data]);
 
   return (
-    <div className={classes['flex-center-items']}>
+    <div className={classes['flex-center-items']} ref={durationDiv}>
       { levelData ?
-        <div className={classes['mb-8']}>
+        <div className={classes['boxChart']}>
           <label for="level" className={classes.chartLabelCls}>Level</label>
           <select id="level" name="level" value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)} className={classes.chartSelectCls}>
             <option value="-">All</option>
@@ -234,8 +284,8 @@ function DurationVisualization({ classes }) {
       }
       { nData ?
         <PieChart
-          width={600}
-          height={600}
+          width={durationDiv.current.offsetWidth}
+          height={605}
         >
           <Pie
             data={nData}
@@ -244,18 +294,28 @@ function DurationVisualization({ classes }) {
             innerRadius="25%"
             outerRadius="80%"
             label={v => v.duration}
+
+            onMouseOver={handleSliceHover}
+            onMouseOut={() => setActiveIndex(null)}
           >
             {
               nData.map((entry, index) => (
                 <Cell
                   key={`slice-${index}`}
                   fill={colors[index % 10]}
-                  //fillOpacity={this.state.activeIndex === index ? 1 : 0.25}
+                  fillOpacity={activeIndex === index ? 1 : 0.8}
                 />
               ))
             }
           </Pie>
-          <Tooltip />
+          <Tooltip
+            content={
+              <CustomTooltip
+                backgroundColor="#4B5563"
+                fontColor="#F59E0B"
+              />
+            }
+          />
           <Legend verticalAlign="top" height={36} />
         </PieChart>
       : <></> }
@@ -269,6 +329,18 @@ function PriceVisualization({ classes }) {
   const [selectedLevel, setSelectedLevel] = useState("-");
   const levelData = useVisualization("levels");
   const data = useVisualization(`price_${selectedLevel}`);
+
+  const priceDiv = useRef(null);
+
+  const [centerPiechartActiveIndex, setCenterPiechartActiveIndex] = useState(null);
+  const handleCenterPiechartSliceHover = (data, index) => {
+    setCenterPiechartActiveIndex(index);
+  };
+
+  const [activeIndex, setActiveIndex] = useState(null);
+  const handleSliceHover = (data, index) => {
+    setActiveIndex(index);
+  };
 
   useEffect(() => {
     if (data) {
@@ -289,9 +361,9 @@ function PriceVisualization({ classes }) {
   }, [data]);
 
   return (
-    <div className={classes['flex-center-items']}>
+    <div className={classes['flex-center-items']} ref={priceDiv}>
       { levelData ?
-        <div className={classes['mb-8']}>
+        <div className={classes['boxChart']}>
           <label for="level" className={classes.chartLabelCls}>Level</label>
           <select id="level" name="level" value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)} className={classes.chartSelectCls}>
             <option value="-">All</option>
@@ -305,8 +377,8 @@ function PriceVisualization({ classes }) {
       { nData && freeData ?
         <>
           <PieChart
-            width={600}
-            height={600}
+            width={priceDiv.current.offsetWidth}
+            height={605}
           >
             <Pie
               data={freeData}
@@ -315,13 +387,16 @@ function PriceVisualization({ classes }) {
               innerRadius="10%"
               outerRadius="20%"
               label={v => v.price}
+
+              onMouseOver={handleCenterPiechartSliceHover}
+              onMouseOut={() => setCenterPiechartActiveIndex(null)}
             >
               {
                 freeData.map((entry, index) => (
                   <Cell
                     key={`slice-${index}`}
                     fill={colorsCategory[index % 10]}
-                    //fillOpacity={this.state.activeIndex === index ? 1 : 0.25}
+                    fillOpacity={centerPiechartActiveIndex === index ? 1 : 0.8}
                   />
                 ))
               }
@@ -334,18 +409,28 @@ function PriceVisualization({ classes }) {
               innerRadius="40%"
               outerRadius="75%"
               label={v => v.price}
+
+              onMouseOver={handleSliceHover}
+              onMouseOut={() => setActiveIndex(null)}
             >
               {
                 nData.map((entry, index) => (
                   <Cell
                     key={`slice-${index}`}
                     fill={colors[index % 10]}
-                    //fillOpacity={this.state.activeIndex === index ? 1 : 0.25}
+                    fillOpacity={activeIndex === index ? 1 : 0.7}
                   />
                 ))
               }
             </Pie>
-            <Tooltip />
+            <Tooltip
+              content={
+                <CustomTooltip
+                  backgroundColor="#4B5563"
+                  fontColor="#F59E0B"
+                />
+              }
+            />
             <Legend verticalAlign="top" height={36} />
           </PieChart>
         </>
@@ -357,21 +442,30 @@ function PriceVisualization({ classes }) {
 function TermsVisualization({ classes }) {
   const data = useVisualization("terms");
 
+  const termsDiv = useRef(null);
+
   return (
-    <div className={classes['flex-center-items']}>
+    <div className={classes['flex-center-items']} ref={termsDiv}>
       { data ?
         <BarChart 
-          width={600}
-          height={300} 
-          data={data} 
+          width={termsDiv.current.offsetWidth}
+          height={680} 
+          data={data.slice(0, 15)} 
           layout="vertical"
           margin={{top: 5, right: 30, left: 20, bottom: 5}}
         >
           <XAxis type="number" allowDecimals={false} />
-          <YAxis type="category" dataKey="term" tick={{ fill: '#E5E7EB' }} />
-          <Tooltip />
+          <YAxis type="category" dataKey="term" width={150} tick={{ fill: '#E5E7EB' }} />
+          <Tooltip
+            content={
+              <CustomTooltip
+                backgroundColor="#4B5563"
+                fontColor="#F59E0B"
+              />
+            }
+          />
           <Legend verticalAlign="top" height={36} />
-          <Bar dataKey="count" fill="#8884d8" name="# terms swiped right">
+          <Bar dataKey="count" fill="#F59E0B" label={{fill: '#000'}} name="# terms swiped right">
             {
               data.map((entry, index) => (
                 <Cell

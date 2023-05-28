@@ -48,7 +48,10 @@ const MatchPageStyle = makeStyles(theme => ({
         flex: 1,
         backgroundColor: 'rgb(17 24 39 / 1)',
         borderRadius: '50px',
-        padding: '10px'
+        padding: '10px',
+        minHeight: '350px',
+        maxHeight: '350px',
+        overflow: 'hidden'
       },
       questionTitle: {
         color: 'rgb(245 158 11 / 1)',
@@ -66,7 +69,10 @@ const MatchPageStyle = makeStyles(theme => ({
         color: 'rgb(255 255 255 / 1)',
         fontSize: '3rem',
         textAlign: 'center',
-        '@media (min-width: 960px)': {
+        [theme.breakpoints.down('sm')]: { // width < 600px
+          fontSize: '2rem',
+        },
+        [theme.breakpoints.up('md')]: { // width > 960px
           fontSize: '5rem',
         },
       },

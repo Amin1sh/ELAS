@@ -67,8 +67,8 @@ export const style = makeStyles((theme) => ({
     width: '100%',
     paddingLeft: '24px',
     paddingRight: '80px',
-    paddingTop: '16px',
-    paddingBottom: '16px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
     fontSize: '1rem',
     borderWidth: '1px',
     borderColor: '#E0E0E0',
@@ -90,9 +90,9 @@ export const style = makeStyles((theme) => ({
   },
   chartLabelCls: {
     display: 'block',
-    fontSize: '12px',
-    fontWeight: 500,
-    color: '#D1D5DB', 
+    color: '#E0E0E0',
+    fontSize: '0.875rem',
+    fontWeight: '500'
   },
   chartSelectCls: {
     marginTop: '4px',
