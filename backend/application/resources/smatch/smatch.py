@@ -193,16 +193,43 @@ visualization_queries = {
     "providers": "SELECT count(*), provider FROM smatch_courselist WHERE instructor != '-' and category != '-' and  provider IS NOT NULL GROUP BY provider ORDER BY count DESC",
     "categories": "SELECT count(*), coalesce(category, 'Other') category FROM smatch_courselist WHERE instructor != '-' and category != '-' GROUP BY category ORDER BY count DESC",
     "levels": "SELECT count(*), level FROM smatch_courselist  WHERE instructor != '-' and category != '-'GROUP BY level ORDER BY count DESC",
+    
     "duration_-": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL GROUP BY duration ORDER BY count DESC",
     "duration_Beginner": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Beginner' GROUP BY duration ORDER BY count DESC",
     "duration_Intermediate": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Intermediate' GROUP BY duration ORDER BY count DESC",
     "duration_Advanced": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Advanced' GROUP BY duration ORDER BY count DESC",
     "duration_All": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'All' GROUP BY duration ORDER BY count DESC",
-    "price_-": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL GROUP BY price ORDER BY count DESC",
-    "price_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Beginner' GROUP BY price ORDER BY count DESC",
-    "price_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Intermediate' GROUP BY price ORDER BY count DESC",
-    "price_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Advanced' GROUP BY price ORDER BY count DESC",
-    "price_All": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'All' GROUP BY price ORDER BY count DESC",
+
+    "duration_coursera_-": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL and provider = 'Coursera' GROUP BY duration ORDER BY count DESC",
+    "duration_coursera_Beginner": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Beginner' and provider = 'Coursera' GROUP BY duration ORDER BY count DESC",
+    "duration_coursera_Intermediate": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Intermediate' and provider = 'Coursera' GROUP BY duration ORDER BY count DESC",
+    "duration_coursera_Advanced": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Advanced' and provider = 'Coursera' GROUP BY duration ORDER BY count DESC",
+    "duration_coursera_All": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'All' and provider = 'Coursera' GROUP BY duration ORDER BY count DESC",
+
+    "duration_edx_-": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL and provider = 'edX' GROUP BY duration ORDER BY count DESC",
+    "duration_edx_Beginner": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Beginner' and provider = 'edX' GROUP BY duration ORDER BY count DESC",
+    "duration_edx_Intermediate": "SELECT count(*), duration FROM smatch_courselist WHERE  instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Intermediate' and provider = 'edX' GROUP BY duration ORDER BY count DESC",
+    "duration_edx_Advanced": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'Advanced' and provider = 'edX' GROUP BY duration ORDER BY count DESC",
+    "duration_edx_All": "SELECT count(*), duration FROM smatch_courselist WHERE instructor != '-' and category != '-' and  duration IS NOT NULL AND level = 'All' and provider = 'edX' GROUP BY duration ORDER BY count DESC",
+    
+    "price_-": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL GROUP BY price ORDER BY price ASC",
+    "price_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Beginner' GROUP BY price ORDER BY price ASC",
+    "price_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Intermediate' GROUP BY price ORDER BY price ASC",
+    "price_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Advanced' GROUP BY price ORDER BY price ASC",
+    "price_All": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'All' GROUP BY price ORDER BY price ASC",
+
+    "price_coursera_-": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL and provider = 'Coursera' GROUP BY price ORDER BY price ASC",
+    "price_coursera_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Beginner' and provider = 'Coursera' GROUP BY price ORDER BY price ASC",
+    "price_coursera_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Intermediate' and provider = 'Coursera' GROUP BY price ORDER BY price ASC",
+    "price_coursera_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Advanced' and provider = 'Coursera' GROUP BY price ORDER BY price ASC",
+    "price_coursera_All": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'All' and provider = 'Coursera' GROUP BY price ORDER BY price ASC",
+
+    "price_edx_-": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL and provider = 'edX' GROUP BY price ORDER BY price ASC",
+    "price_edx_Beginner": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Beginner' and provider = 'edX' GROUP BY price ORDER BY price ASC",
+    "price_edx_Intermediate": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Intermediate' and provider = 'edX' GROUP BY price ORDER BY price ASC",
+    "price_edx_Advanced": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'Advanced' and provider = 'edX' GROUP BY price ORDER BY price ASC",
+    "price_edx_All": "SELECT count(*), price FROM smatch_courselist WHERE instructor != '-' and category != '-' and  price IS NOT NULL AND level = 'All' and provider = 'edX' GROUP BY price ORDER BY price ASC",
+
     "terms": "SELECT * FROM smatch_matched_terms ORDER BY count DESC LIMIT 50"
 };
 

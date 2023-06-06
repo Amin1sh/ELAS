@@ -119,5 +119,24 @@ export const style = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  'chart-box-3col': {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  'pie-chart-item-box': {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  'pie-chart-label': {
+    fontSize: '14pt',
+    fontWeight: 'bold',
+    marginBottom: '20px'
   }
 }));

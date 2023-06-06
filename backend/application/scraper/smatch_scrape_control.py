@@ -147,7 +147,7 @@ def edx_run(config, store_in_database=True):
         retries = 3
         while retries > 0:
             try:
-                browser.get(f'https://www.edx.org/search?tab=course&page={str(page_number)}')
+                browser.get(f'https://www.edx.org/search?tab=course&language=English&page={str(page_number)}')
                 time.sleep(5)
                 browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
                 time.sleep(3)
@@ -186,6 +186,7 @@ def edx_run(config, store_in_database=True):
     if store_in_database == True:
         # add data to database (without testing)
         for index, row in data.iterrows():
+            row['link'] = row['link'].split('?')[0]
             check_exists = session.query(Smatch_CourseList).filter(Smatch_CourseList.link == row['link']).first()
             
             if check_exists is None:
@@ -229,9 +230,6 @@ def coursera_run(config, store_in_database = True):
     # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=2560,1440")
-    
-    # Set proxy with SOCKS5
-    # chrome_options.add_argument("--proxy-server=socks5://localhost:9999")
     
     browser = webdriver.Chrome(options=chrome_options)
 
@@ -332,7 +330,10 @@ def coursera_run(config, store_in_database = True):
             except:
                 pass
             
-            
+
+        # active just for debuging
+        # break
+
         try:
             next_page_elm = browser.find_element(by=By.XPATH, value=f"//main/div/div/div/div/div/div/div/div/div[2]/div[2]/div/div/div[1]/div/button[7]")
             is_next_page_elm_disabled = next_page_elm.get_attribute('disabled') is not None # True, False

@@ -166,7 +166,7 @@ export default function FindMatchPage() {
 
   const swipeRight = () => {
     setSwipeState(1);
-    if (groups[currentGroup].title == "Your Intrest") {
+    if (groups[currentGroup].title == "Your Interest") {
       setSwipedTerms([ ...swipedTerms, groups[currentGroup].questions[currentQuestion].text ]);
     }
     appendAnswers(groups[currentGroup].questions[currentQuestion].value);
@@ -222,8 +222,8 @@ export default function FindMatchPage() {
 
   const maybeAddQuestionGroup = async () => {
     let selectedClusters = Object.entries(terms);
-    if (groups[groups.length - 1].title == "Your Intrest") {
-      const votes = countVotes(groupRanges["Your Intrest"]);
+    if (groups[groups.length - 1].title == "Your Interest") {
+      const votes = countVotes(groupRanges["Your Interest"]);
       const ties = getTies(votes);
       
       if (ties.length >= 1) {
@@ -261,7 +261,7 @@ export default function FindMatchPage() {
     }
 
     let newGroup = {
-      title: "Your Intrest",
+      title: "Your Interest",
       questions, 
       skippable: false,
     };

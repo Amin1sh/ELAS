@@ -74,6 +74,14 @@ const style = makeStyles((theme) => ({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
+      },
+
+      'not-found-match': {
+        fontSize: '14pt',
+        fontWeight: 'bold',
+        background: '#dedede',
+        padding: '10px',
+        borderRadius: '15px',
       }
 }));
 

@@ -108,7 +108,6 @@ function InstructorsVisualization({ classes }) {
           <option value={5}>5</option>
           <option value={10}>10</option>
           <option value={20}>20</option>
-          <option value={40}>All</option>
         </select>
       </div>
 
@@ -242,10 +241,15 @@ function CategoriesVisualization({ classes }) {
 }
 
 function DurationVisualization({ classes }) {
-  const [nData, setNData] = useState(null);
+  const [nCombineData, setNCombineData] = useState(null);
+  const [nCourseraData, setNCourseraData] = useState(null);
+  const [nEdXData, setNEdXData] = useState(null);
+
   const [selectedLevel, setSelectedLevel] = useState("-");
   const levelData = useVisualization("levels");
-  const data = useVisualization(`duration_${selectedLevel}`);
+  const combineData = useVisualization(`duration_${selectedLevel}`);
+  const courseraData = useVisualization(`duration_coursera_${selectedLevel}`);
+  const edXData = useVisualization(`duration_edx_${selectedLevel}`);
 
   const durationDiv = useRef(null);
 
@@ -255,18 +259,82 @@ function DurationVisualization({ classes }) {
   };
 
   useEffect(() => {
-    if (data) {
-      const top = data.slice(0, 3).map((v) => {
-        return { count: v.count, duration: `${v.duration} hour${v.duration == '1' ? '' : 's'}` };
-      });
-      const rest = data.slice(3);
-      const restSum = rest.reduce((acc, v) => acc + parseInt(v.count), 0);
+    if (combineData) {
+      const step1 = {
+        count: combineData.filter((x) => x.duration < 15)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '<15'
+      };
 
-      setNData([...top, { count: restSum, duration: "Other" }]);
+      const step2 = {
+        count: combineData.filter((x) => x.duration >= 15 && x.duration <= 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '15-50'
+      }
+
+      const step3 = {
+        count: combineData.filter((x) => x.duration > 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '>50'
+      };
+
+      setNCombineData([step1, step2, step3]);
     } else {
-      setNData(null);
+      setNCombineData(null);
     }
-  }, [data]);
+  }, [combineData]);
+
+  useEffect(() => {
+    if (courseraData) {
+      const step1 = {
+        count: courseraData.filter((x) => x.duration < 15)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '<15'
+      };
+
+      const step2 = {
+        count: courseraData.filter((x) => x.duration >= 15 && x.duration <= 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '15-50'
+      }
+
+      const step3 = {
+        count: courseraData.filter((x) => x.duration > 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '>50'
+      };
+      
+      setNCourseraData([step1, step2, step3]);
+    } else {
+      setNCourseraData(null);
+    }
+  }, [courseraData]);
+
+  useEffect(() => {
+    if (edXData) {
+      const step1 = {
+        count: edXData.filter((x) => x.duration < 15)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '<15'
+      };
+
+      const step2 = {
+        count: edXData.filter((x) => x.duration >= 15 && x.duration <= 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '15-50'
+      }
+
+      const step3 = {
+        count: edXData.filter((x) => x.duration > 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        duration: '>50'
+      };
+
+      setNEdXData([step1, step2, step3]);
+    } else {
+      setNEdXData(null);
+    }
+  }, [edXData]);
 
   return (
     <div className={classes['flex-center-items']} ref={durationDiv}>
@@ -282,13 +350,18 @@ function DurationVisualization({ classes }) {
         </div>
         :<></>
       }
-      { nData ?
-        <PieChart
-          width={durationDiv.current.offsetWidth}
-          height={605}
+      
+
+      <div className={classes['chart-box-3col']}>
+        { nCourseraData ? 
+        
+          <div className={classes['pie-chart-item-box']}>
+            <PieChart
+          width={durationDiv.current.offsetWidth / 3}
+          height={420}
         >
           <Pie
-            data={nData}
+            data={nCourseraData}
             dataKey={(v) => parseInt(v.count)}
             nameKey="duration"
             innerRadius="25%"
@@ -299,7 +372,7 @@ function DurationVisualization({ classes }) {
             onMouseOut={() => setActiveIndex(null)}
           >
             {
-              nData.map((entry, index) => (
+              nCourseraData.map((entry, index) => (
                 <Cell
                   key={`slice-${index}`}
                   fill={colors[index % 10]}
@@ -318,17 +391,110 @@ function DurationVisualization({ classes }) {
           />
           <Legend verticalAlign="top" height={36} />
         </PieChart>
-      : <></> }
+            <p className={classes['pie-chart-label']}>Coursera</p>
+          </div>
+          : <></> }
+
+
+      { nEdXData ?   
+        <div className={classes['pie-chart-item-box']}>
+          <PieChart
+        width={durationDiv.current.offsetWidth / 3}
+        height={420}
+      >
+        <Pie
+          data={nEdXData}
+          dataKey={(v) => parseInt(v.count)}
+          nameKey="duration"
+          innerRadius="25%"
+          outerRadius="80%"
+          label={v => v.duration}
+
+          onMouseOver={handleSliceHover}
+          onMouseOut={() => setActiveIndex(null)}
+        >
+          {
+            nEdXData.map((entry, index) => (
+              <Cell
+                key={`slice-${index}`}
+                fill={colors[index % 10]}
+                fillOpacity={activeIndex === index ? 1 : 0.8}
+              />
+            ))
+          }
+        </Pie>
+        <Tooltip
+          content={
+            <CustomTooltip
+              backgroundColor="#4B5563"
+              fontColor="#F59E0B"
+            />
+          }
+        />
+        <Legend verticalAlign="top" height={36} />
+      </PieChart>
+          <p className={classes['pie-chart-label']}>edX</p>
+        </div>
+        : <></> }
+
+{ nCombineData ? 
+        
+        <div className={classes['pie-chart-item-box']}>
+          <PieChart
+        width={durationDiv.current.offsetWidth / 3}
+        height={420}
+      >
+        <Pie
+          data={nCombineData}
+          dataKey={(v) => parseInt(v.count)}
+          nameKey="duration"
+          innerRadius="25%"
+          outerRadius="80%"
+          label={v => v.duration}
+
+          onMouseOver={handleSliceHover}
+          onMouseOut={() => setActiveIndex(null)}
+        >
+          {
+            nCombineData.map((entry, index) => (
+              <Cell
+                key={`slice-${index}`}
+                fill={colors[index % 10]}
+                fillOpacity={activeIndex === index ? 1 : 0.8}
+              />
+            ))
+          }
+        </Pie>
+        <Tooltip
+          content={
+            <CustomTooltip
+              backgroundColor="#4B5563"
+              fontColor="#F59E0B"
+            />
+          }
+        />
+        <Legend verticalAlign="top" height={36} />
+      </PieChart>
+          <p className={classes['pie-chart-label']}>All</p>
+        </div>
+        : <></> }
+      </div>
+
     </div>
   );
 }
 
 function PriceVisualization({ classes }) {
-  const [nData, setNData] = useState(null);
-  const [freeData, setFreeData] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState("-");
   const levelData = useVisualization("levels");
-  const data = useVisualization(`price_${selectedLevel}`);
+
+  const [nCombineData, setNCombineData] = useState(null);
+  const [nCourseraData, setNCourseraData] = useState(null);
+  const [nEdXData, setNEdXData] = useState(null);
+
+  const combineData = useVisualization(`price_${selectedLevel}`);
+  const courseraData = useVisualization(`price_coursera_${selectedLevel}`);
+  const edXData = useVisualization(`price_edx_${selectedLevel}`);
 
   const priceDiv = useRef(null);
 
@@ -343,22 +509,100 @@ function PriceVisualization({ classes }) {
   };
 
   useEffect(() => {
-    if (data) {
-      const top = data.slice(0, 15).map((v) => {
-        return { count: v.count, price: v.price == 0 ? "Free" : `$${v.price}` };
-      });
-      const rest = data.slice(15);
-      const restSum = rest.reduce((acc, v) => acc + parseInt(v.count), 0);
+    if (courseraData) {
+      const stepFree = {
+        count: courseraData.filter((x) => x.price == 0)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: 'Free'
+      };
 
-      setNData([...top, { count: restSum, price: "Other" }].filter(v => v.price != "Free"));
+      const step1 = {
+        count: courseraData.filter((x) => x.price > 0 && x.price < 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '<50 €'
+      };
 
-      setFreeData(data.reduce((acc, v) => {
-        return [{count: acc[0].count + parseInt(v.count), price: "Free"}];
-      }, [ { count: 0, price: "Free" } ]));
+      const step2 = {
+        count: courseraData.filter((x) => x.price >= 50 && x.price <= 150)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '50-150 €'
+      }
+
+      const step3 = {
+        count: courseraData.filter((x) => x.price > 150)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '>150 €'
+      };
+
+      setNCourseraData([stepFree, step1, step2, step3]);
     } else {
-      setNData(null);
+      setNCourseraData(null);
     }
-  }, [data]);
+  }, [courseraData]);
+
+  useEffect(() => {
+    if (edXData) {
+      const stepFree = {
+        count: edXData.filter((x) => x.price == 0)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: 'Free'
+      };
+
+      const step1 = {
+        count: edXData.filter((x) => x.price > 0 && x.price < 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '<50 €'
+      };
+
+      const step2 = {
+        count: edXData.filter((x) => x.price >= 50 && x.price <= 150)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '50-150 €'
+      }
+
+      const step3 = {
+        count: edXData.filter((x) => x.price > 150)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '>150 €'
+      };
+
+      setNEdXData([stepFree, step1, step2, step3]);
+    } else {
+      setNEdXData(null);
+    }
+  }, [edXData]);
+
+  useEffect(() => {
+    if (combineData) {
+      const stepFree = {
+        count: combineData.filter((x) => x.price == 0)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: 'Free'
+      };
+
+      const step1 = {
+        count: combineData.filter((x) => x.price > 0 && x.price < 50)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '<50 €'
+      };
+
+      const step2 = {
+        count: combineData.filter((x) => x.price >= 50 && x.price <= 150)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '50-150 €'
+      }
+
+      const step3 = {
+        count: combineData.filter((x) => x.price > 150)
+          .reduce((accumulator, item) => accumulator + item.count, 0),
+        price: '>150 €'
+      };
+
+      setNCombineData([stepFree, step1, step2, step3]);
+    } else {
+      setNCombineData(null);
+    }
+  }, [combineData]);
 
   return (
     <div className={classes['flex-center-items']} ref={priceDiv}>
@@ -374,47 +618,72 @@ function PriceVisualization({ classes }) {
         </div>
         :<></>
       }
-      { nData && freeData ?
-        <>
+  
+        <div className={classes['chart-box-3col']}>
+        { nCourseraData ? 
+        
+          <div className={classes['pie-chart-item-box']}>
+            <PieChart
+              width={priceDiv.current.offsetWidth / 3}
+              height={420}
+            >
+              <Pie
+                data={nCourseraData}
+                dataKey={(v) => parseInt(v.count)}
+                nameKey="price"
+                innerRadius="25%"
+                outerRadius="80%"
+                label={v => v.price}
+
+                onMouseOver={handleSliceHover}
+                onMouseOut={() => setActiveIndex(null)}
+              >
+                {
+                  nCourseraData.map((entry, index) => (
+                    <Cell
+                      key={`slice-${index}`}
+                      fill={colors[index % 10]}
+                      fillOpacity={activeIndex === index ? 1 : 0.7}
+                    />
+                  ))
+                }
+              </Pie>
+
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    backgroundColor="#4B5563"
+                    fontColor="#F59E0B"
+                  />
+                }
+              />
+              <Legend verticalAlign="top" height={36} />
+            </PieChart>
+
+            <p className={classes['pie-chart-label']}>Coursera</p>
+          </div>
+          : <></> }
+
+          { nEdXData ? 
+          
+          <div className={classes['pie-chart-item-box']}>
           <PieChart
-            width={priceDiv.current.offsetWidth}
-            height={605}
+            width={priceDiv.current.offsetWidth / 3}
+            height={420}
           >
             <Pie
-              data={freeData}
+              data={nEdXData}
               dataKey={(v) => parseInt(v.count)}
               nameKey="price"
-              innerRadius="10%"
-              outerRadius="20%"
-              label={v => v.price}
-
-              onMouseOver={handleCenterPiechartSliceHover}
-              onMouseOut={() => setCenterPiechartActiveIndex(null)}
-            >
-              {
-                freeData.map((entry, index) => (
-                  <Cell
-                    key={`slice-${index}`}
-                    fill={colorsCategory[index % 10]}
-                    fillOpacity={centerPiechartActiveIndex === index ? 1 : 0.8}
-                  />
-                ))
-              }
-            </Pie>
-
-            <Pie
-              data={nData}
-              dataKey={(v) => parseInt(v.count)}
-              nameKey="price"
-              innerRadius="40%"
-              outerRadius="75%"
+              innerRadius="25%"
+              outerRadius="80%"
               label={v => v.price}
 
               onMouseOver={handleSliceHover}
               onMouseOut={() => setActiveIndex(null)}
             >
               {
-                nData.map((entry, index) => (
+                nEdXData.map((entry, index) => (
                   <Cell
                     key={`slice-${index}`}
                     fill={colors[index % 10]}
@@ -423,6 +692,7 @@ function PriceVisualization({ classes }) {
                 ))
               }
             </Pie>
+
             <Tooltip
               content={
                 <CustomTooltip
@@ -433,8 +703,53 @@ function PriceVisualization({ classes }) {
             />
             <Legend verticalAlign="top" height={36} />
           </PieChart>
-        </>
-      : <></> }
+          <p className={classes['pie-chart-label']}>edX</p>
+          </div>
+          : <></>}
+
+          { nCombineData ? 
+          <div className={classes['pie-chart-item-box']}>
+          <PieChart
+            width={priceDiv.current.offsetWidth / 3}
+            height={420}
+          >
+            <Pie
+              data={nCombineData}
+              dataKey={(v) => parseInt(v.count)}
+              nameKey="price"
+              innerRadius="25%"
+              outerRadius="80%"
+              label={v => v.price}
+
+              onMouseOver={handleSliceHover}
+              onMouseOut={() => setActiveIndex(null)}
+            >
+              {
+                nCombineData.map((entry, index) => (
+                  <Cell
+                    key={`slice-${index}`}
+                    fill={colors[index % 10]}
+                    fillOpacity={activeIndex === index ? 1 : 0.7}
+                  />
+                ))
+              }
+            </Pie>
+
+            <Tooltip
+              content={
+                <CustomTooltip
+                  backgroundColor="#4B5563"
+                  fontColor="#F59E0B"
+                />
+              }
+            />
+            <Legend verticalAlign="top" height={36} />
+          </PieChart>
+          <p className={classes['pie-chart-label']}>All</p>
+          </div>
+
+          : <></> }
+        </div>
     </div>
   );
 }

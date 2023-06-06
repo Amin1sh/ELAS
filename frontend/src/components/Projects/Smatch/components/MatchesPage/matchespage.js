@@ -26,15 +26,21 @@ export default function MatchesPage() {
               </div>
 
               <div className={classes.paper}>
-                {JSON.parse(history.result).map((item) => (
-                  <Link
-                    key={item.course_id}
-                    className={classes.link}
-                    to={`/smatch/course/${item.course_id}`}
-                  >
-                    <span>{item.subject}</span>
-                  </Link>
-                ))}
+                {
+                  (JSON.parse(history.result).length > 0) ?
+                    JSON.parse(history.result).map((item) => (
+                    <Link
+                      key={item.course_id}
+                      className={classes.link}
+                      to={`/smatch/course/${item.course_id}`}
+                    >
+                      <span>{item.subject}</span>
+                    </Link>
+                  )) : 
+                  <div className={classes['not-found-match']}>
+                    <p>Sorry, there is no match according to your interest, you can try again.</p>
+                  </div>
+                }
               </div>
             </div>
           ))}

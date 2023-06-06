@@ -166,7 +166,7 @@ export default function Admin(props) {
                 }
                 type="submit"
               >
-                EDX Scrape courses
+                Scrape edX courses
               </Button>
               </form>
             </Grid>
@@ -194,7 +194,7 @@ export default function Admin(props) {
                   }
                   type="submit"
                 >
-                  Coursera Scrape courses
+                  Scrape Coursera courses
                 </Button>
               </form>
             </Grid>
