@@ -27,7 +27,7 @@ export default function CoursePage() {
           </p>
         </Card>
         <Card title="Price" pageClasses={classes} classes={classes.priceItem}>
-          <p>${course.price}</p>
+          <p>€{course.price}</p>
         </Card>
 
         <a href={course.link} target="_blank" className={classes.courseLink}>Click here to go to course</a>

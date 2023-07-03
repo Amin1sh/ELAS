@@ -25,7 +25,7 @@ def get_all_courses(filters):
 def kmeans(courses):
     # Represent each article as a vector
     my_stop_words = text.ENGLISH_STOP_WORDS.union(
-        ["learn","la", "digital", "online", "specialization", "course", "platform", "courses"])
+        ["la"])
     vectorizer = TfidfVectorizer(ngram_range=(3, 3), stop_words=my_stop_words)
     X = vectorizer.fit_transform(courses.description)
 

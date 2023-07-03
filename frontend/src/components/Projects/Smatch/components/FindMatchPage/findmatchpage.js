@@ -34,9 +34,9 @@ const defaultGroups = [
     title: "Price",
     questions: [
       { value: "free", text: "Show me free courses" },
-      { value: "cheap", text: "Show me cheap courses (<$50)" },
-      { value: "moderate", text: "Show me moderately priced courses ($50-$150)" },
-      { value: "expensive", text: "Show me expensive courses (>$150)" },
+      { value: "cheap", text: "Show me cheap courses (<€50)" },
+      { value: "moderate", text: "Show me moderately priced courses (€50-€150)" },
+      { value: "expensive", text: "Show me expensive courses (>€150)" },
     ],
     skippable: true,
   },
